@@ -8,7 +8,7 @@ https://blog.csdn.net/ShuSheng0007/article/details/81269295
 https://www.cnblogs.com/duanxz/p/3571217.html
 https://my.oschina.net/itblog/blog/495253
 https://blog.csdn.net/try_try_try/article/details/80500211    --springboot自动配置原理
-
+https://www.cnblogs.com/hhcode520/p/9450933.html    --springboot自动配置原理
 
 
 
