@@ -22,7 +22,22 @@ https://www.e-learn.cn/content/qita/800708
 
 
 
+public static Object getCloneObject(Object bean) {
+    Object cloneBean = null;
 
+    try {
+        ByteArrayOutputStream byout = new ByteArrayOutputStream();
+        ObjectOutputStream obj = new ObjectOutputStream(byout);
+        obj.writeObject(bean);
+        ByteArrayInputStream byin = new ByteArrayInputStream(byout.toByteArray());
+        ObjectInputStream ins = new ObjectInputStream(byin);
+        cloneBean = ins.readObject();
+    } catch (Throwable var6) {
+        var6.printStackTrace();
+    }
+
+    return cloneBean;
+}
 
 
 
