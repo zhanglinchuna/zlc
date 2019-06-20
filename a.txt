@@ -21,6 +21,11 @@ https://segmentfault.com/a/1190000013341344#articleHeader0 --spring事务管理
 https://www.cnblogs.com/winner-0715/p/6109225.html --jackson
 
 
+https://www.cnblogs.com/aheizi/p/6851416.html --java线程池总结
+
+
+
+
 
 public static Object getCloneObject(Object bean) {
     Object cloneBean = null;
