@@ -23,7 +23,7 @@ https://www.cnblogs.com/winner-0715/p/6109225.html --jackson
 
 https://www.cnblogs.com/aheizi/p/6851416.html --java线程池总结
 
-
+https://www.cnblogs.com/Java3y/p/10266306.html --redis面试
 
 
 
