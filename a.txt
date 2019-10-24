@@ -25,6 +25,14 @@ https://www.cnblogs.com/aheizi/p/6851416.html --java线程池总结
 
 https://www.cnblogs.com/Java3y/p/10266306.html --redis面试
 
+https://segmentfault.com/a/1190000016597648?utm_source=tag-newest#articleHeader11 --lambda表达式
+
+
+
+
+
+
+
 
 
 public static Object getCloneObject(Object bean) {
