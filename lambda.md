@@ -171,3 +171,97 @@ public void test(){
 
 当我们定义一个接口，如果接口中只定义了一个方法，那么这种接口被称为函数式接口，Lambda表达式就必须依托这个前提。
 
+接口
+
+```java
+public interface MyPredicate<T>{
+    boolean isSelected(T t);
+}
+```
+过滤的方法
+
+```java
+public List<Employee> filterEmployee(List<Employee> emps, MyPredicate<Employee> mp){
+    List<Employee> list = new ArrayList<>();
+    
+    for (Employee employee : emps) {
+        if(mp.isSelected(employee)){
+            list.add(employee);
+        }
+    }
+    return list;
+}
+```
+调用过滤方法传入匿名实现类
+
+```java
+List<Employee> list = filterEmployee(emps, new MyPredicate<Employee>(){
+    @Override
+    public boolean isSelected(Employee t) {
+        return t.getAge() < 35;
+    }
+});
+```
+Lambda表达式调用过滤方法
+
+```java
+List<Employee> list = filterEmployee(emps, (e) -> e.getAge() < 35);
+```
+
+### 三、Lambda表达式结构
+
+Java8中引入了一个新的操作符 "->" 该操作符称为箭头操作符或 Lambda 操作符，它将 Lambda 表达式拆分成两部分：
+- 左侧：Lambda 表达式的参数列表，就是isSelected方法的参数列表(Employee t)
+- 右侧：Lambda 表达式中所需执行的功能， 即 Lambda 体：return t.getAge() < 35;
+
+```java
+new MyPredicate<Employee>() {
+    @Override
+    public boolean isSelected(Employee t) {
+        return t.getAge() < 35;
+    }
+}
+```
+被下面的lambda表达式替换
+
+```java
+(e) -> e.getAge() < 35
+```
+e只是一个名称，代表Employee对象，e.getAge() < 35 可以省略return。
+
+### 四、Lambda语法格式
+
+（1）无参数，无返回值（接口的方法是没有参数和返回值的）
+
+```java
+() -> System.out.println("Hello Lambda!")
+```
+（2）有一个参数，并且无返回值
+
+```java
+(x) -> System.out.println(x)
+```
+（3）若只有一个参数，小括号可以省略不写
+
+```java
+x -> System.out.println(x)
+```
+（4） 有两个以上的参数，有返回值，并且 Lambda 体中有多条语句，需要大括号，需要return。
+
+```java
+Comparator<Integer> com = (x, y) -> {
+     System.out.println("函数式接口");
+     return Integer.compare(x, y);
+};
+```
+（5）若 Lambda 体中只有一条语句， return 和 大括号都可以省略不写。
+
+```java
+Comparator<Integer> com = (x, y) -> Integer.compare(x, y)
+```
+（6）Lambda 表达式的参数列表的数据类型可以省略不写，因为JVM编译器通过上下文推断出，数据类型，即“类型推断”
+
+```java
+(Integer x, Integer y) -> Integer.compare(x, y)
+```
+注意：Lambda 表达式需要“函数式接口”的支持，函数式接口：接口中只有一个抽象方法的接口，称为函数式接口。 可以使用注解`@FunctionalInterface` 修饰，可以检查是否是函数式接口。
