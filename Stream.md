@@ -19,8 +19,6 @@ Stream 就如同一个迭代器（Iterator），单向，不可往复，数据�
 
 ### 三、创建流
 
-#### 3.1 基于数组创建流
-
 ```java
 public class StreamTest {
     public static void createStream() {
@@ -30,46 +28,14 @@ public class StreamTest {
         Stream s2 = Stream.of("111","222","333");
         String[] ss = {"123","321","456","654"};
         Stream<String> s3 = Arrays.stream(ss);
-    }
-}
-```
-#### 3.2 通过构建器生成流
-
-```java
-public class StreamTest {
-    public static void createStream() {
         // 通过构建器生成流
         Stream<Object> s4 = Stream.builder().add("123").add("321").add("444").add("@21").build();
-    }
-}
-```
-#### 3.3 基于集合生成流
-
-```java
-public class StreamTest {
-    public static void createStream() {
         // 通过集合生成流
         List<String> lists = Arrays.asList("123","321","1212","32321");
         Stream<String> s5 = lists.stream();
         Stream<String> s6 = lists.parallelStream();// 并行流
-    }
-}
-```
-#### 3.4 创建空流
-
-```java
-public class StreamTest {
-    public static void createStream() {
         // 创建空流
         Stream<String> s7  = Stream.empty();
-    }
-}
-```
-#### 3.5 基于函数创建无限流
-
-```java
-public class StreamTest {
-    public static void createStream() {
         // 创建无限流
         Stream.generate(()->"number"+new Random().nextInt()).limit(100).forEach(System.out::println);
         Stream.iterate(0,n -> n+2).limit(10).forEach(System.out::println);
@@ -199,3 +165,6 @@ public class StreamTest {
 </tr>
 </tbody>
 </table>
+
+#### 4.1 filter
+
