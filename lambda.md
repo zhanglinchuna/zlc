@@ -265,3 +265,185 @@ Comparator<Integer> com = (x, y) -> Integer.compare(x, y)
 (Integer x, Integer y) -> Integer.compare(x, y)
 ```
 注意：Lambda 表达式需要“函数式接口”的支持，函数式接口：接口中只有一个抽象方法的接口，称为函数式接口。 可以使用注解`@FunctionalInterface` 修饰，可以检查是否是函数式接口。
+
+### 五、Lambda接口编程流程
+
+1. 定义一个函数式接口
+2. 编写一个方法，输入需要操做的数据和接口
+3. 在调用方法时传入数据 和 lambda 表达式，用来操作数据
+
+举例，定义一个可以对两个整数进行加减乘除的操作。以前我们可能定义四个方法，但是如果增加操作类型则需要再定义对应的方法。可以使用Lambda表达式来实现。
+
+1，定义一个函数式接口，使用@FunctionalInterface注解标注
+
+```java
+@FunctionalInterface
+public interface MyFunction<R,T>{
+    R operator(T t1, T t2);
+}
+```
+2，编写一个方法，输入需要操做的数据和接口，基本数据类型需要包装类型
+
+```java
+public Integer getValue(Integer x, Integer y, MyFunction<Integer, Integer> mf){
+    return mf.operator(x, y);
+}
+```
+3，在调用方法时传入数据 和 lambda 表达式，用来操作数据
+
+```java
+@Test
+public void test(){
+    System.out.println(getValue(20,5, (x, y) -> x + y ));
+    System.out.println(getValue(20,5, (x, y) -> x - y ));
+    System.out.println(getValue(20,5, (x, y) -> x * y ));
+    System.out.println(getValue(20,5, (x, y) -> x / y ));
+}
+```
+### 六、Java8内置接口
+
+上面我们看到要使用Lambda表达式必须先定义接口，创建相关方法之后才可使用，这样做十分不便，其实java8已经内置了许多接口，方便我们使用Lambda表达式。
+
+*Java8 内置的四大核心函数式接口*
+
+Consumer<T> : 消费型接口：有入参，无返回值
+
+```java
+void accept(T t);
+```
+Supplier<T> : 供给型接口：无入参，有返回值
+
+```java
+T get(); 
+```
+Function<T, R> : 函数型接口：有入参，有返回值
+
+```java
+R apply(T t);
+```
+Predicate<T> : 断言型接口：有入参，有返回值，返回值类型确定是boolea
+
+```java
+boolean test(T t); 
+```
+
+举例：对字符串进行操作，有输入有输出，使用函数型接口 Function<T, R>
+
+编写一个方法，输入需要操做的数据和接口
+
+```java
+public String strHandler(String str, Function<String, String> fun){
+    return fun.apply(str);
+}
+```
+在调用方法时传入数据 和 lambda 表达式，用来操作数据
+
+```java
+@Test
+public void test(){
+    System.out.println(strHandler("ABC",(x) -> x.toLowerCase()));
+    System.out.println(strHandler("  aaf  ",(x) -> x.trim()));
+}
+```
+注意：当strHandler方法只是把传入的数据str放入到apply(str)进行执行的时候，也就是strHandler方法只是简单的调用apply方法而没有其他逻辑，那么strHandler方法也可以省略掉.
+
+```java
+@Test
+public void test(){
+    Function<String, String> fun = (x) -> x.toLowerCase();
+    System.out.println(fun.apply("ABC"));
+    fun = (x) -> x.trim();
+    System.out.println(fun.apply("  aaf  "));
+}
+```
+
+### 七、引用
+
+引用理解为 Lambda 表达式的另外一种表现形式，提供了一种简短的语法而已。主要有三种：
+
+- 方法引用
+- 构造器引用
+- 数组引用
+
+#### 7.1 方法引用
+
+注意：方法引用所引用的方法的参数列表与返回值类型，需要与函数式接口中抽象方法的参数列表和返回值类型保持一致！
+
+1. 对象的引用 :: 实例方法名
+
+```java
+@Test
+ public void test2(){
+    Employee emp = new Employee(101, "张三", 18, 9999.99);
+    
+    Supplier<String> sup1 = () -> emp.getName();
+    System.out.println(sup1.get());
+    
+    Supplier<String> sup2 = emp::getName;
+    System.out.println(sup2.get());
+}
+```
+其中
+
+```java
+() -> emp.getName()
+```
+被替换为
+
+```java
+emp::getName
+```
+注意 getName的参数和返回值与Supplier接口的get方法的参数和返回值一致，否则会出现错误。
+
+```java
+@Test
+public void test1(){
+    PrintStream ps = System.out;
+    Consumer<String> con = (str) -> ps.println(str);
+    con.accept("Hello Java8！");
+    
+    Consumer<String> con2 = ps::println;
+    con2.accept("Hello Java8！");
+    
+    Consumer<String> con3 = System.out::println;
+    con3.accept("Hello Java8！");
+}
+```
+这个例子中有入参，但是经过方法引用变形之后，似乎没有入参了，其实这是由于println方法和accept方法的入参和返回值一致，因此无需传入。
+
+2. 类名 :: 静态方法名
+
+```java
+@Test
+public void test(){
+    Comparator<Integer> com = (x, y) -> Integer.compare(x, y);
+    Comparator<Integer> com2 = Integer::compare;
+}
+```
+下面的也是：
+
+```java
+@Test
+public void test(){
+    BiFunction<Double, Double, Double> fun = (x, y) -> Math.max(x, y);
+    System.out.println(fun.apply(2.5, 222.2));
+    
+    BiFunction<Double, Double, Double> fun2 = Math::max;
+    System.out.println(fun2.apply(3.2, 21.5));
+}
+```
+3. 类名 :: 实例方法名
+
+```java
+@Test
+public void test(){
+    BiPredicate<String, String> bp = (x, y) -> x.equals(y);
+    System.out.println(bp.test("abcde", "abcde"));
+
+    BiPredicate<String, String> bp2 = String::equals;
+    System.out.println(bp2.test("abc", "abc"));
+}
+```
+使用场景： 若Lambda 的参数列表的第一个参数，是实例方法的调用者，第二个参数(或无参)是实例方法的参数时，格式： ClassName::MethodNam
+
+#### 7.2 构造器引用
