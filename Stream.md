@@ -168,3 +168,20 @@ public class StreamTest {
 
 #### 4.1 filter
 
+filter方法是过滤器方法，针对的是流中所有元素，满足条件的元素将会被保留以组成新的流。
+
+```java
+public class StreamTest {
+    public static void main(String[] args) {
+        List<String> list = Arrays.asList("123","456","789","1101","asdaa","3e3e3e","2321eew","212121121");
+        filterTest(list);
+    }
+    public static void filterTest(List<String> list){
+        list.stream()
+                .filter(e -> e.length() > 4 && e.length()<7)// 过滤掉长度小于等于4,大于等于7的元素
+                .peek(System.out::println)// 查阅中间流结果
+                .collect(Collectors.toList());// 将流转回集合类型
+    }
+}
+```
+#### 4.2 
