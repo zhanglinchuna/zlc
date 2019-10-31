@@ -447,3 +447,48 @@ public void test(){
 使用场景： 若Lambda 的参数列表的第一个参数，是实例方法的调用者，第二个参数(或无参)是实例方法的参数时，格式： ClassName::MethodNam
 
 #### 7.2 构造器引用
+
+注意：构造器的参数列表，需要与函数式接口中参数列表保持一致！
+
+使用方式：类名 :: new
+
+```java
+@Test
+public void test(){
+    //获取一个Employee对象，调用的是Employee无参构造器
+    Supplier<Employee> sup = () -> new Employee();
+    System.out.println(sup.get());
+    
+    //也是调用Employee无参构造器，因为Supplier的get方法没有入参
+    Supplier<Employee> sup2 = Employee::new;
+    System.out.println(sup2.get());
+}
+```
+```java
+@Test
+public void test(){
+    //意味着Employee有一个带一个参数的构造器，参数类型是String
+    Function<String, Employee> fun = Employee::new;
+
+    //意味着Employee有一个带两个个参数的构造器，参数类型是String，Integer
+    BiFunction<String, Integer, Employee> fun2 = Employee::new;
+}
+```
+因为Function接口的方法需要一个String类型的参数，因此Employee::new是调用带有一个String类型参数的构造器。同理 BiFunction 调用的是带有一个String类型参数和Integer参数的的构造器 。
+
+#### 7.3 数组引用
+
+类型[] :: new;
+
+```java
+@Test
+public void test(){
+    Function<Integer, String[]> fun = (args) -> new String[args];
+    String[] strs = fun.apply(10);
+    System.out.println(strs.length);
+    
+    Function<Integer, Employee[]> fun2 = Employee[] :: new;
+    Employee[] emps = fun2.apply(20);
+    System.out.println(emps.length);
+}
+```
