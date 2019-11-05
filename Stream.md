@@ -104,4 +104,106 @@ public class StreamTest {
     }
 }
 ```
-#### 4.3 
+#### 4.3 flatMap
+
+flatMap针对流中的每一个元素进行操作，将结果组成新流，当流中元素包含子元素的时候，通过该方法，获取到元素的子元素，并将子元素组成新流返回。
+
+```java
+public class StreamTest {
+    public static void main(String[] args) {
+        List<String> list = Arrays.asList("123","456","789","1101","asdaa","3e3e3e","2321eew","212121121");
+        flatMap(list);
+    }
+    public static void flatMap(List<String> list){
+        list.stream()
+                .filter(e -> e.length()>5 && e.length()<7)
+                .peek(System.out::println)
+                .map(e -> e.split(""))// 将每个字符串元素分解为字符数组
+                .flatMap(e -> Arrays.stream(e))//将每个字符数组并转化为流
+                .peek(System.out::println)
+                .collect(Collectors.toList());
+    }
+}
+```
+#### 4.4 distinct
+
+distinct方法用于去重复元素
+
+```java
+public class StreamTest {
+    public static void main(String[] args) {
+        distinctTest();
+    }
+    public static void distinctTest(){
+        int[] int1 = {1,2,3,4};
+        int[] int2 = {5,3,7,1};
+        List<int[]> ints = Arrays.asList(int1,int2);
+        ints.stream()
+                .flatMapToInt(Arrays::stream)
+                .distinct()
+                .peek(System.out::println)
+                .toArray();
+    }
+}
+```
+#### 4.5 sorted
+
+sorted表示对流中的元素进行排序，需要使用Conparable和Comparator比较器。
+
+```java
+public class StreamTest {
+    public static void main(String[] args) {
+        List<String> list = Arrays.asList("123","456","789","1101","asdaa","3e3e3e","2321eew","212121121");
+        sortedTest(list);
+    }
+    public static void sortedTest(List<String> list){
+        System.out.println("----自然顺序:");
+        list.stream().sorted().peek(System.out::println).collect(Collectors.toList());
+        System.out.println("----指定排序:");
+        list.stream().sorted((a,b) -> a.length()-b.length()).peek(System.out::println).collect(Collectors.toList());
+    }
+}
+```
+#### 4.6 limit
+
+limit可用于从首个元素开始截取N个元素，组成新流返回。
+
+```java
+public class StreamTest {
+    public static void main(String[] args) {
+        List<String> list = Arrays.asList("123","456","789","1101","asdaa","3e3e3e","2321eew","212121121");
+        limitTest(list);
+    }
+    public static void limitTest(List<String> list){
+        list.stream().limit(2).peek(System.out::println).collect(Collectors.toList());
+    }
+}
+```
+#### 4.7 skip
+
+skip表示放弃N个元素，将剩余元素组成新流返回。
+
+```java
+public class StreamTest {
+    public static void main(String[] args) {
+        List<String> list = Arrays.asList("123","456","789","1101","asdaa","3e3e3e","2321eew","212121121");
+        skipTest(list);
+    }
+    public static void skipTest(List<String> list){
+        list.stream().skip(2).peek(System.out::println).collect(Collectors.toList());
+    }
+}
+```
+### 五、流结束操作
+
+- forEach: 循环操作Stream中数据。
+- toArray: 返回流中元素对应的数组对象。
+- reduce: 聚合操作，用来做统计。
+- collect: 聚合操作，封装目标数据。
+- min、max、count: 聚合操作，最小值，最大值，总数量。
+- anyMatch: 短路操作，有一个符合条件返回true。
+- allMatch: 所有数据都符合条件返回true。
+- noneMatch: 所有数据都不符合条件返回true。
+- findFirst: 短路操作，获取第一个元素。
+- findAny: 短路操作，获取任一元素。
+- forEachOrdered: 暗元素顺序执行循环操作。
