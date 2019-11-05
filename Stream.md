@@ -47,128 +47,19 @@ public class StreamTest {
 
 流中间操作指的是该操作的返回值仍然是流。
 
-<table>
-<thead>
-<tr>
-<th>序号</th>
-<th>操作</th>
-<th>方法</th>
-<th>说明</th>
-<th>备注</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td>filter</td>
-<td>Stream&lt;T&gt; filter(Predicate&lt;? super T&gt; predicate)</td>
-<td>返回当前流中满足参数predicate过滤条件的元素组成的新流</td>
-<td>过滤器</td>
-</tr>
-<tr>
-<td>2</td>
-<td>map</td>
-<td>&lt;R&gt; Stream&lt;R&gt; map(Function&lt;? super T, ? extends R&gt; mapper)</td>
-<td>返回通过给定mapper作用于当前流的每个元素之后的结果组成的新流</td>
-<td>函数</td>
-</tr>
-<tr>
-<td>3</td>
-<td>mapToInt</td>
-<td>IntStream mapToInt(ToIntFunction&lt;? super T&gt; mapper)</td>
-<td>返回通过给定mapper作用于当前流的每个元素之后的结果组成的新的Int流</td>
-<td>函数</td>
-</tr>
-<tr>
-<td>4</td>
-<td>mapToLong</td>
-<td>LongStream mapToLong(ToLongFunction&lt;? super T&gt; mapper)</td>
-<td>返回通过给定mapper作用于当前流的每个元素之后的结果组成的新的Long流</td>
-<td>函数</td>
-</tr>
-<tr>
-<td>5</td>
-<td>mapToDouble</td>
-<td>DoubleStream mapToDouble(ToDoubleFunction&lt;? super T&gt; mapper)</td>
-<td>返回通过给定mapper作用于当前流的每个元素之后的结果组成的新的Double流</td>
-<td>函数</td>
-</tr>
-<tr>
-<td>6</td>
-<td>flatMap</td>
-<td>&lt;R&gt; Stream&lt;R&gt; flatMap(Function&lt;? super T, ? extends Stream&lt;? extends R&gt;&gt; mapper)</td>
-<td>根据给定的mapper作用于当前流的每个元素，将结果组成新的流来返回</td>
-<td>扁平函数</td>
-</tr>
-<tr>
-<td>7</td>
-<td>flatMapToInt</td>
-<td>IntStream flatMapToInt(Function&lt;? super T, ? extends IntStream&gt; mapper)</td>
-<td>根据给定的mapper作用于当前流的每个元素，将结果组成新的Int流来返回</td>
-<td>扁平函数</td>
-</tr>
-<tr>
-<td>8</td>
-<td>flatMapToLong</td>
-<td>LongStream flatMapToLong(Function&lt;? super T, ? extends LongStream&gt; mapper)</td>
-<td>根据给定的mapper作用于当前流的每个元素，将结果组成新的Long流来返回</td>
-<td>扁平函数</td>
-</tr>
-<tr>
-<td>9</td>
-<td>flatMapToDouble</td>
-<td>DoubleStream flatMapToDouble(Function&lt;? super T, ? extends DoubleStream&gt; mapper)</td>
-<td>根据给定的mapper作用于当前流的每个元素，将结果组成新的Double流来返回</td>
-<td>扁平函数</td>
-</tr>
-<tr>
-<td>10</td>
-<td>distinct</td>
-<td>Stream&lt;T&gt; distinct()</td>
-<td>返回去掉当前流中重复元素之后的新流</td>
-<td>去重</td>
-</tr>
-<tr>
-<td>11</td>
-<td>sorted</td>
-<td>Stream&lt;T&gt; sorted()</td>
-<td>返回当前流中元素排序之后的新流，需要元素类型实现Comparable</td>
-<td>排序</td>
-</tr>
-<tr>
-<td>12</td>
-<td>sorted</td>
-<td>Stream&lt;T&gt; sorted(Comparator&lt;? super T&gt; comparator)</td>
-<td>返回当前流中元素排序之后的新流，需要传递一个Comparator</td>
-<td>排序</td>
-</tr>
-<tr>
-<td>13</td>
-<td>peek</td>
-<td>Stream&lt;T&gt; peek(Consumer&lt;? super T&gt; action)</td>
-<td>针对流中的每个元素执行操作action</td>
-<td>查阅</td>
-</tr>
-<tr>
-<td>14</td>
-<td>limit</td>
-<td>Stream&lt;T&gt; limit(long maxSize)</td>
-<td>返回指定的数量的元素组成的新流</td>
-<td>限制</td>
-</tr>
-<tr>
-<td>15</td>
-<td>skip</td>
-<td>Stream&lt;T&gt; skip(long n)</td>
-<td>返回第n个之后的元素组成的新流</td>
-<td>跳过</td>
-</tr>
-</tbody>
-</table>
+- filter：过滤流，过滤流中的元素，返回一个符合条件的Stream
+- map：转换流，将一种类型的流转换为另外一种流。（mapToInt、mapToLong、mapToDouble 返回int、long、double基本类型对应的Stream）
+- flatMap：简单的说，就是一个或多个流合并成一个新流。（flatMapToInt、flatMapToLong、flatMapToDouble 返回对应的IntStream、LongStream、DoubleStream流。）
+- distinct：返回去重的Stream。
+- sorted：返回一个排序的Stream。
+- peek：主要用来查看流中元素的数据状态。
+- limit：返回前n个元素数据组成的Stream。属于短路操作
+- skip：返回第n个元素后面数据组成的Stream。
+
 
 #### 4.1 filter
 
-filter方法是过滤器方法，针对的是流中所有元素，满足条件的元素将会被保留以组成新的流。
+过滤流，过滤流中的元素，返回一个符合条件的Stream
 
 ```java
 public class StreamTest {
@@ -184,4 +75,33 @@ public class StreamTest {
     }
 }
 ```
-#### 4.2 
+#### 4.2 map
+
+转换流，将一种类型的流转换为另外一种流，需要针对流中的每个元素执行，然后将执行的结果组成新的流返回。
+
+```java
+public class StreamTest {
+    public static void main(String[] args) {
+        List<String> list01 = Arrays.asList("afd", "fdf", "Xes");
+        List list = mapToStrTest(list01);
+
+        List<Person> list02 = Arrays.asList(new Person(20, "zs"), new Person(22, "ls"), new Person(25, "ww"));
+        List<Map> maps = mapToObjTest(list02);
+    }
+
+    public static List mapToStrTest(List<String> list){
+        return list.stream().map(e -> e.toUpperCase())//将字符串转成大写
+                .peek(System.out::println)// 查阅中间流结果
+                .collect(Collectors.toList());
+    }
+
+    public static List<Map> mapToObjTest(List<Person> list){
+        return list.stream().map(e -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put(e.getName(),e.getAge());
+            return map; //返回一个对象
+        }).collect(Collectors.toList());
+    }
+}
+```
+#### 4.3 
