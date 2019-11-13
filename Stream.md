@@ -340,3 +340,36 @@ public class StreamTest {
 45
 ```
 方法2：
+
+方法2比方法1多了一个参数identity，identity实际上就是一个初始值，如果流中没有元素的话，还有初始值作为结果返回，不会存在null的情况。
+
+```java
+public class StreamTest {
+    public static void main(String[] args) {
+        List<Integer> ints = Arrays.asList();//空元素的集合
+        Optional<Integer> optional = ints.stream().reduce((a,b)->Integer.sum(a,b));
+        //System.out.println(optional.get());//异常！流中的元素为空，所以结果optional为null
+        Integer result = ints.stream().reduce(3, (a, b) -> Integer.sum(a, b));//设置默认值 3
+        System.out.println(result);
+    }
+}
+```
+```
+3
+```
+方法3
+
+在方法2方法的基础上又加了一个参数combiner，其实这个方法是用于处理并行流的归纳操作，最后的参数combiner用于归纳各个并行的结果，用于得出最终结果。
+
+```java
+public class StreamTest {
+    public static void main(String[] args) {
+        List<Integer> ints = Arrays.asList(1,2,3,4,5,6,7,8,9);
+        Integer min = ints.parallelStream().reduce(Integer.MAX_VALUE, Integer::min, Integer::min);
+        System.out.println(min);
+    }
+}
+```
+```
+1
+```
