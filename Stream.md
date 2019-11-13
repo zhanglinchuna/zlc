@@ -373,3 +373,56 @@ public class StreamTest {
 ```
 1
 ```
+#### 5.4 collect
+
+collect是收集的意思，这里的作用就是收集归纳，将流中的数据映射为各种结果。
+
+collect方法有两个重载方法：
+
+```java
+public interface Stream<T> extends BaseStream<T, Stream<T>> {
+
+    <R, A> R collect(Collector<? super T, A, R> collector);// 方法1
+    
+    <R> R collect(Supplier<R> supplier,BiConsumer<R, ? super T> accumulator,BiConsumer<R, R> combiner);// 方法2
+}
+```
+
+方法1：
+
+它只需要一个Collector类型的参数，这个Collector可以称呼为收集器，我们可以随意组装一个收集器来进行元素归纳。
+
+JDK提供了一个Collectors工具类，在这个工具类里面预实现了多个的Collector供我们直接使用
+
+```java
+public class CollectorsTest {
+   
+    public static void main(String[] args) {
+        List<String> list = Arrays.asList("123","456","789","1101","212121121","asdaa","3e3e3e","2321eew");
+        // toCollection 将结果转成LinkedList
+        List<String> list01 = list.stream().collect(Collectors.toCollection(LinkedList::new));
+        // toCollection 将结果转成TreeSet
+        List<String> list01 = list.stream().collect(Collectors.toCollection(TreeSet::new));
+        // toList 将结果转成ArrayList
+        List<String> list02 = list.stream().collect(Collectors.toList());
+        // toSet 将结果转成HashSet
+        Set<String> set01 = list.stream().collect(Collectors.toSet());
+        // toMap 将结果转成HashMap
+        Map<String, String> collect = list.stream().collect(Collectors.toMap(k -> k,k -> "value:" + k));
+    }
+}
+```
+
+方法2：
+
+该方法有3个参数：
+
+第一个参数：supplier用于生成一个R类型的结果容器来盛放结果
+
+第二个参数：accumulator累加器用于定义盛放的方式，其中T为一个元素，R为结果容器
+
+第三个参数：combiner的作用是将并行操作的各个结果整合起来
+
+```java
+
+```
