@@ -125,13 +125,8 @@ flatMap针对流中的每一个元素进行操作，将结果组成新流，当�
 ```java
 public class StreamTest {
     public static void main(String[] args) {
-        List<String> list = Arrays.asList("123","456","789","1101","asdaa","3e3e3e","2321eew","212121121");
-        flatMap(list);
-    }
-    public static void flatMap(List<String> list){
+        List<String> list = Arrays.asList("3e3e3e");
         list.stream()
-                .filter(e -> e.length()>5 && e.length()<7)//过滤，获取长度大于5且小于7的字符
-                .peek(System.out::println)
                 .map(e -> e.split(""))// 将每个字符串元素分解为字符数组
                 .flatMap(e -> Arrays.stream(e))//将每个字符数组并转化为流
                 .peek(System.out::println)
@@ -140,7 +135,6 @@ public class StreamTest {
 }
 ```
 ```
-3e3e3e
 3
 e
 3
@@ -155,9 +149,6 @@ distinct方法用于去重复元素
 ```java
 public class StreamTest {
     public static void main(String[] args) {
-        distinctTest();
-    }
-    public static void distinctTest(){
         int[] int1 = {1,2,3,4};
         int[] int2 = {5,3,7,1};
         List<int[]> ints = Arrays.asList(int1,int2);// ints[1,2,3,4,5,3,7,1]
@@ -185,9 +176,6 @@ sorted表示对流中的元素进行排序，需要使用Conparable和Comparator
 public class StreamTest {
     public static void main(String[] args) {
         List<String> list = Arrays.asList("123","456","789","1101","asdaa","3e3e3e","2321eew","212121121");
-        sortedTest(list);
-    }
-    public static void sortedTest(List<String> list){
         System.out.println("----自然顺序:");
         list.stream().sorted().peek(System.out::println).collect(Collectors.toList());
         System.out.println("----指定排序:");// 按长度排序
@@ -223,9 +211,6 @@ limit可用于从首个元素开始截取N个元素，组成新流返回。
 public class StreamTest {
     public static void main(String[] args) {
         List<String> list = Arrays.asList("123","456","789","1101","asdaa","3e3e3e","2321eew","212121121");
-        limitTest(list);
-    }
-    public static void limitTest(List<String> list){
         list.stream().limit(2).peek(System.out::println).collect(Collectors.toList());// 获取集合前两位元素
     }
 }
@@ -242,9 +227,6 @@ skip表示放弃N个元素，将剩余元素组成新流返回。
 public class StreamTest {
     public static void main(String[] args) {
         List<String> list = Arrays.asList("123","456","789","1101","asdaa","3e3e3e","2321eew","212121121");
-        skipTest(list);
-    }
-    public static void skipTest(List<String> list){
         list.stream().skip(2).peek(System.out::println).collect(Collectors.toList());// 跳过集合前两位元素
     }
 }
@@ -321,12 +303,40 @@ toArray有两个方法，一个是无参方法，一个有参方法。
 public class StreamTest {
     public static void main(String[] args) {
         List<String> list = Arrays.asList("123","456","789","1101","212121121","asdaa","3e3e3e","2321eew");
-        toArrayTest(list);
-    }
-    public static void toArrayTest(List<String> list){
+        
         Object[] objs = list.stream().filter(e -> e.length()>6).toArray();//无参的方法
         String[] ss = list.stream().filter(e -> e.length()>6).toArray(String[]::new);//有参的方法
     }
 }
 ```
 #### 5.3 reduce
+
+reduce方法有三个重载的方法
+
+```java
+public interface Stream<T> extends BaseStream<T, Stream<T>> {
+
+    Optional<T> reduce(BinaryOperator<T> accumulator);// 方法1
+    
+    T reduce(T identity, BinaryOperator<T> accumulator);// 方法2
+    
+    <U> U reduce(U identity,BiFunction<U, ? super T, U> accumulator,BinaryOperator<U> combiner);// 方法3
+}
+```
+方法1：
+
+这个方法只有一个参数，该方法的作用就是将流中的两个元素传给BinaryOperator的实现方法，BinaryOperator的实现方法处理完后返回处理后的结果，然后将处理结果和流中元素又循环回调BinaryOperator的实现方法，将结果和元素传递给方法，以此类推，直到最后一个元素执行完毕，返回的就是最终结果。
+
+```java
+public class StreamTest {
+    public static void main(String[] args) {
+        List<Integer> ints = Arrays.asList(1,2,3,4,5,6,7,8,9);//将所有元素累加
+        Optional<Integer> optional = ints.stream().reduce(Integer::sum);// Integer::sum 相当于 (a,b)->Integer.sum(a,b)
+        System.out.println(optional.get());
+    }
+}
+```
+```
+45
+```
+方法2：
