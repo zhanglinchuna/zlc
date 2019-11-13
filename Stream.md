@@ -75,6 +75,10 @@ public class StreamTest {
     }
 }
 ```
+```
+asdaa
+3e3e3e
+```
 #### 4.2 map
 
 转换流，将一种类型的流转换为另外一种流，需要针对流中的每个元素执行，然后将执行的结果组成新的流返回。
@@ -84,7 +88,7 @@ public class StreamTest {
     public static void main(String[] args) {
         List<String> list01 = Arrays.asList("afd", "fdf", "Xes");
         List list = mapToStrTest(list01);
-
+        System.out.println("----------");
         List<Person> list02 = Arrays.asList(new Person(20, "zs"), new Person(22, "ls"), new Person(25, "ww"));
         List<Map> maps = mapToObjTest(list02);
     }
@@ -95,14 +99,24 @@ public class StreamTest {
                 .collect(Collectors.toList());
     }
 
-    public static List<Map> mapToObjTest(List<Person> list){
+    public static List<Map> mapToObjTest(List<Person> list) {
         return list.stream().map(e -> {
             Map<String, Object> map = new HashMap<>();
-            map.put(e.getName(),e.getAge());
+            map.put(e.getName(), e.getAge());
             return map; //返回一个对象
-        }).collect(Collectors.toList());
+        }).peek(System.out::println)// 查阅中间流结果
+          .collect(Collectors.toList());
     }
 }
+```
+```
+AFD
+FDF
+XES
+----------
+{zs=20}
+{ls=22}
+{ww=25}
 ```
 #### 4.3 flatMap
 
@@ -116,7 +130,7 @@ public class StreamTest {
     }
     public static void flatMap(List<String> list){
         list.stream()
-                .filter(e -> e.length()>5 && e.length()<7)
+                .filter(e -> e.length()>5 && e.length()<7)//过滤，获取长度大于5且小于7的字符
                 .peek(System.out::println)
                 .map(e -> e.split(""))// 将每个字符串元素分解为字符数组
                 .flatMap(e -> Arrays.stream(e))//将每个字符数组并转化为流
@@ -124,6 +138,15 @@ public class StreamTest {
                 .collect(Collectors.toList());
     }
 }
+```
+```
+3e3e3e
+3
+e
+3
+e
+3
+e
 ```
 #### 4.4 distinct
 
@@ -137,14 +160,22 @@ public class StreamTest {
     public static void distinctTest(){
         int[] int1 = {1,2,3,4};
         int[] int2 = {5,3,7,1};
-        List<int[]> ints = Arrays.asList(int1,int2);
+        List<int[]> ints = Arrays.asList(int1,int2);// ints[1,2,3,4,5,3,7,1]
         ints.stream()
                 .flatMapToInt(Arrays::stream)
-                .distinct()
+                .distinct() // 去除重复元素
                 .peek(System.out::println)
                 .toArray();
     }
 }
+```
+```
+1
+2
+3
+4
+5
+7
 ```
 #### 4.5 sorted
 
@@ -159,10 +190,30 @@ public class StreamTest {
     public static void sortedTest(List<String> list){
         System.out.println("----自然顺序:");
         list.stream().sorted().peek(System.out::println).collect(Collectors.toList());
-        System.out.println("----指定排序:");
+        System.out.println("----指定排序:");// 按长度排序
         list.stream().sorted((a,b) -> a.length()-b.length()).peek(System.out::println).collect(Collectors.toList());
     }
 }
+```
+```
+----自然顺序:
+1101
+123
+212121121
+2321eew
+3e3e3e
+456
+789
+asdaa
+----指定排序:
+123
+456
+789
+1101
+asdaa
+3e3e3e
+2321eew
+212121121
 ```
 #### 4.6 limit
 
@@ -175,9 +226,13 @@ public class StreamTest {
         limitTest(list);
     }
     public static void limitTest(List<String> list){
-        list.stream().limit(2).peek(System.out::println).collect(Collectors.toList());
+        list.stream().limit(2).peek(System.out::println).collect(Collectors.toList());// 获取集合前两位元素
     }
 }
+```
+```
+123
+456
 ```
 #### 4.7 skip
 
@@ -190,13 +245,22 @@ public class StreamTest {
         skipTest(list);
     }
     public static void skipTest(List<String> list){
-        list.stream().skip(2).peek(System.out::println).collect(Collectors.toList());
+        list.stream().skip(2).peek(System.out::println).collect(Collectors.toList());// 跳过集合前两位元素
     }
 }
+```
+```
+789
+1101
+asdaa
+3e3e3e
+2321eew
+212121121
 ```
 ### 五、流结束操作
 
 - forEach: 循环操作Stream中数据。
+- forEachOrdered: 按元素顺序执行循环操作。
 - toArray: 返回流中元素对应的数组对象。
 - reduce: 聚合操作，用来做统计。
 - collect: 聚合操作，封装目标数据。
@@ -206,4 +270,63 @@ public class StreamTest {
 - noneMatch: 所有数据都不符合条件返回true。
 - findFirst: 短路操作，获取第一个元素。
 - findAny: 短路操作，获取任一元素。
-- forEachOrdered: 暗元素顺序执行循环操作。
+
+#### 5.1 forEach和forEachOrdered
+
+遍历集合操作，如果是多线程并行遍历forEach不能保证元素的顺序而forEachOrdered可以保证元素按顺序遍历
+
+```java
+public class StreamTest {
+    public static void main(String[] args) {
+        List<String> list = Arrays.asList("123","456","789","1101","212121121","asdaa","3e3e3e","2321eew");
+        forEachTest(list);
+        System.out.println("----------");
+        forEachOrderedTest(list);
+    }
+    public static void forEachTest(List<String> list){
+        list.stream().parallel().forEach(System.out::println);// 使用parallel方法多线程并行遍历
+    }
+    public static void forEachOrderedTest(List<String> list){
+        list.stream().parallel().forEachOrdered(System.out::println);// 使用parallel方法多线程并行遍历
+    }
+}
+```
+```
+asdaa
+212121121
+789
+1101
+2321eew
+3e3e3e
+456
+123
+----------
+123
+456
+789
+1101
+212121121
+asdaa
+3e3e3e
+2321eew
+```
+
+#### 5.2 toArray
+
+toArray有两个方法，一个是无参方法，一个有参方法。
+
+无参方法返回的只能是Object[]数组类型，而有参方法，可以指定结果数组类型。
+
+```java
+public class StreamTest {
+    public static void main(String[] args) {
+        List<String> list = Arrays.asList("123","456","789","1101","212121121","asdaa","3e3e3e","2321eew");
+        toArrayTest(list);
+    }
+    public static void toArrayTest(List<String> list){
+        Object[] objs = list.stream().filter(e -> e.length()>6).toArray();//无参的方法
+        String[] ss = list.stream().filter(e -> e.length()>6).toArray(String[]::new);//有参的方法
+    }
+}
+```
+#### 5.3 reduce
