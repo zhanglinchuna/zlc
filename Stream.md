@@ -424,5 +424,132 @@ public class CollectorsTest {
 第三个参数：combiner的作用是将并行操作的各个结果整合起来
 
 ```java
+public class StreamTest {
+    public static void main(String[] args) {
+        List<String> list = Arrays.asList("123", "456", "789", "1101", "212121121", "asdaa", "3e3e3e", "2321eew");
+        list.stream().parallel().collect(
+                ArrayList::new, //第一个参数：创建一个新的ArrayList集合
+                (a, b) -> a.add(b), // 第二个参数：a是第一个参数创建的ArrayList集合，b是list流中的元素
+                (a, b) ->a.addAll(b));// 第三个参数：将多个线程的ArrayList集合一个一个的整体添加到第一个集合中，最终整合出一个最终结果并返回
+    }
+}
+```
 
+#### 5.5 max和min
+
+通过给定的比较器，得出流中最大\最小的元素，为避免null返回，这里使用Optional来封装返回值。
+
+```java
+public class StreamTest {
+    public static void main(String[] args) {
+        List<String> list = Arrays.asList("123","456","789","1101","212121121","asdaa","3e3e3e","2321eew");
+        System.out.println("长度最大：" + list.stream().max((a,b)-> a.length()-b.length()));
+        System.out.println("长度最小：" + list.stream().min((a,b)-> a.length()-b.length()));
+    }
+}
+```
+```
+长度最大：Optional[212121121]
+长度最小：Optional[123]
+```
+
+#### 5.6 count
+
+count是无参方法，用于计数，返回流中元素个数。
+
+```java
+public class StreamTest {
+    public static void main(String[] args) {
+        List<String> list = Arrays.asList("123","456","789","1101","212121121","asdaa","3e3e3e","2321eew");
+        System.out.println("元素个数为：" + list.stream().count());
+    }
+}
+```
+```
+元素个数为：8
+```
+
+#### 5.7 anyMatch
+
+该方法需要一个Predicate参数，用于校验流中的元素，只要有一个满足规则，则返回true，全不满足，返回false。
+
+```java
+public class StreamTest {
+    public static void main(String[] args) {
+        List<String> list = Arrays.asList("123","456","789","1101","212121121","asdaa","3e3e3e","2321eew");
+        System.out.println(list.stream().anyMatch(e -> e.length()>10));
+        System.out.println(list.stream().anyMatch(e -> e.length()>8));
+    }
+}
+```
+```
+false
+true
+```
+
+#### 5.8 allMatch
+
+该方法同样需要一个Predicate参数，用于校验流中的所有元素，只有全部满足规则才能返回true，只要有一个不满足则返回false。
+
+```java
+public class StreamTest {
+    public static void main(String[] args) {
+        List<String> list = Arrays.asList("123","456","789","1101","212121121","asdaa","3e3e3e","2321eew");
+        System.out.println(list.stream().allMatch(e -> e.length()>1));
+        System.out.println(list.stream().allMatch(e -> e.length()>3));
+    }
+}
+```
+```
+true
+false
+```
+
+#### 5.9 noneMatch
+
+该方法同样需要一个Predicate参数，用于校验流中的所有元素,只有所有元素都不满足规则的情况下返回true，否则返回false。
+
+```java
+public class StreamTest {
+    public static void main(String[] args) {
+        List<String> list = Arrays.asList("123","456","789","1101","212121121","asdaa","3e3e3e","2321eew");
+        System.out.println(list.stream().noneMatch(e -> e.length()>10));
+        System.out.println(list.stream().noneMatch(e -> e.length()>8));
+    }
+}
+```
+```
+true
+false
+```
+#### 5.10 findFirst
+
+该方法无参数，主要用于获取流中的第一个元素，如果流无序，那么可能返回任意一个。
+
+```java
+public class StreamTest {
+    public static void main(String[] args) {
+        List<String> list = Arrays.asList("123","456","789","1101","212121121","asdaa","3e3e3e","2321eew");
+        System.out.println(list.stream().parallel().findFirst().get());
+    }
+}
+```
+```
+123
+```
+
+#### 5.11 findAny
+
+该方法无参数，主要用于获取流中的任一元素。
+
+```java
+public class StreamTest {
+    public static void main(String[] args) {
+        List<String> list = Arrays.asList("123","456","789","1101","212121121","asdaa","3e3e3e","2321eew");
+        System.out.println(list.stream().parallel().findAny().get());
+    }
+}
+```
+```
+asdaa
 ```
