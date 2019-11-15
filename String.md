@@ -16,7 +16,7 @@ str.codePointBefore(1); // 结果：97
 str.codePointCount(0, 2); // 结果：2
 ```
 
-#### 字符串之间比较
+#### 字符串之间比较大小
 
 - int	compareTo(String anotherString);  //按字典顺序比较两个字符串
 - int	compareToIgnoreCase(String str);  //按字典顺序比较两个字符串，不考虑大小写
@@ -34,3 +34,10 @@ str.codePointCount(0, 2); // 结果：2
 "hello".concat(" world"); //结果：hello world
 ```
 
+#### 是否包含指定字符串
+
+- boolean	contains(CharSequence s); //字符串包含指定的char值序列时，返回true
+
+```java
+"abcdef".contains("cde"); //结果：true
+```
