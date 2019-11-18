@@ -71,9 +71,10 @@ s1.contentEquals(sb); //结果：true
   * ooffset — 字符串参数中子区域的起始偏移量。
   * len — 要比较的字符数。
   */
-String str = "abcdef";
-str.regionMatches(2, "cd", 0, 2); //结果：true
-str.regionMatches(true, 2, "cD", 0, 2); //结果：true
+String str1 = "abcdef";
+String str2 = "cd";
+str1.regionMatches(2, str2, 0, str2.lenght()); //结果：true
+str1.regionMatches(true, 2, "cD", 0, 2); //结果：true
 ```
 
 > equals和contentEquals区别：
