@@ -73,6 +73,7 @@ s1.contentEquals(sb); //结果：true
   */
 String str1 = "abcdef";
 String str2 = "cd";
+// str1.substring(2, 2+str2.length()).equals(str2.substring(0, str2.length()))简写如下
 str1.regionMatches(2, str2, 0, str2.lenght()); //结果：true
 str1.regionMatches(true, 2, "cD", 0, 2); //结果：true
 ```
