@@ -62,7 +62,9 @@ s1.contentEquals(sb); //结果：true
 ```
 
 > equals和contentEquals区别：
+>
 > equals：不仅比较这个字符串的内容还检查另一个被比较的对象是否是String类型，如果不是String类型则返回false
+>
 > contentEquals：只比较两者的内容是否相同，不检查被比较对象的类型
 
 #### 字符数组转成字符串
