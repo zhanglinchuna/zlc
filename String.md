@@ -6,14 +6,16 @@
 - int	codePointAt(int index); //返回指定索引处字符的ascii码
 - int	codePointBefore(int index) //返回指定索引前一个字符的ascii码
 - int	codePointCount(int beginIndex, int endIndex); //返回指定索引范围内的字符ascii码个数
+- int	offsetByCodePoints(int index, int codePointOffset); //  返回此String中从给定的index处偏移codePointOffset个代码点的索引
 
 ```java
 String str = "abcdef";
 
-str.charAt(1);  // 结果：b
-str.codePointAt(0); // 结果：97
-str.codePointBefore(1); // 结果：97
-str.codePointCount(0, 2); // 结果：2
+str.charAt(1);  //结果：b
+str.codePointAt(0); //结果：97
+str.codePointBefore(1); //结果：97
+str.codePointCount(0, 2); //结果：2
+str.offsetByCodePoints(2,3); //结果：5
 ```
 
 #### 字符串之间比较大小
@@ -48,7 +50,8 @@ str.codePointCount(0, 2); // 结果：2
 - boolean	equalsIgnoreCase(String anotherString); //将此 String 与另一个 String 比较，不考虑大小写。
 - boolean	contentEquals(CharSequence cs); //将此字符串与指定的 CharSequence 比较
 - boolean	contentEquals(StringBuffer sb); //将此字符串与指定的 StringBuffer 比较
-
+- boolean	regionMatches(int toffset, String other, int ooffset, int len); //两个字符串区域是否相等
+- boolean	regionMatches(boolean ignoreCase, int toffset, String other, int ooffset, int len); //两个字符串区域是否相等
 
 ```java
 String s1="123";
@@ -59,6 +62,18 @@ s1.equals(s2); //结果：true
 s1.contentEquals(s2); //结果：true
 s1.equals(sb); //结果：false
 s1.contentEquals(sb); //结果：true
+
+ /**
+  * 参数：
+  * ignoreCase — 如果为 true，则比较字符时忽略大小写。
+  * toffset — 此字符串中子区域的起始偏移量。
+  * other — 字符串参数。
+  * ooffset — 字符串参数中子区域的起始偏移量。
+  * len — 要比较的字符数。
+  */
+String str = "abcdef";
+str.regionMatches(2, "cd", 0, 2); //结果：true
+str.regionMatches(true, 2, "cD", 0, 2); //结果：true
 ```
 
 > equals和contentEquals区别：
@@ -82,7 +97,9 @@ String.copyValueOf(new char[]{'a','b','c'},0,2); //结果：ab
 - byte[] getBytes(); //使用平台的默认字符集将此 String 编码为 byte 序列，并将结果存储到一个新的 byte 数组中
 - byte[] getBytes(Charset charset); //使用给定的 charset 将此 String 编码到 byte 序列，并将结果存储到新的 byte 数组
 - byte[] getBytes(String charsetName); //使用指定的字符集将此 String 编码为 byte 序列，并将结果存储到一个新的 byte 数组中
+- char[]	toCharArray(); //将此字符串转换为一个新的字符数组
 - void getChars(int srcBegin, int srcEnd, char[] dst, int dstBegin); //将字符从此字符串复制到目标字符数组
+- CharSequence	subSequence(int beginIndex, int endIndex); //返回一个新的字符序列，它是此序列的一个子序列
 
 ```java
 "abc".getBytes(); //['a','b','c']
@@ -101,6 +118,8 @@ byte[] by = "abc".getBytes(Charset.defaultCharset());//['97','98','99']
 
 #### 是否以指定字符串开头或结尾
 
+- boolean	startsWith(String prefix); //测试此字符串是否以指定的前缀开始
+- boolean	startsWith(String prefix, int toffset); //测试此字符串从指定索引开始的子字符串是否以指定前缀开始
 - boolean	endsWith(String suffix); //字符串是否以指定的后缀结束
 
 ```java
@@ -138,3 +157,47 @@ str.lastIndexOf("b",2); //结果：1
 - int	length(); //返回此字符串的长度
 - boolean	isEmpty(); //当且仅当 length() 为 0 时返回 true
 
+#### 正则匹配字符串
+
+- boolean	matches(String regex); //字符串是否匹配给定的正则表达式
+- String[]	split(String regex); //根据给定正则表达式的匹配拆分此字符串
+- String[]	split(String regex, int limit); //根据匹配给定的正则表达式来拆分此字符串
+
+#### 字符串替换
+
+- String	replace(char oldChar, char newChar); //返回一个新的字符串，它是通过用newChar替换此字符串中出现的所有oldChar得到的
+- String	replace(CharSequence target, CharSequence replacement); //使用指定的字面值替换序列替换此字符串所有匹配字面值目标序列的子字符串
+- String	replaceAll(String regex, String replacement); //使用给定的replacement替换此字符串所有匹配给定的正则表达式的子字符串
+- String	replaceFirst(String regex, String replacement); //使用给定的replacement替换此字符串匹配给定的正则表达式的第一个子字符串
+
+```java
+String str = "66ccffbb";
+str.replace('b', 'a'); //结果：66ccffaa
+str.replaceAll("bb","cc"); //结果：66ccffcc
+str.replaceFirst("c","e"); //结果：66ecffbb
+```
+
+#### 字符串截取
+
+- String	substring(int beginIndex); //返回一个新的字符串，它是此字符串的一个子字符串
+- String	substring(int beginIndex, int endIndex); //返回一个新字符串，它是此字符串的一个子字符串
+- String	trim(); //忽略字符串前面和后面空格
+
+#### 字符串大小写转换
+
+- String	toLowerCase(); //将此字符串转换为小写
+- String	toLowerCase(Locale locale); //使用给定 Locale 的规则将此 String 中的所有字符都转换为小写
+- String	toUpperCase(); //将此字符串转换为大写
+- String	toUpperCase(Locale locale); ////使用给定 Locale 的规则将此 String 中的所有字符都转换为大写
+
+#### 其它类型转String
+
+- static String	valueOf(boolean b); //返回 boolean 参数的字符串表示形式
+- static String	valueOf(char c); //返回 char 参数的字符串表示形式
+- static String	valueOf(char[] data); //返回 char 数组参数的字符串表示形式
+- static String	valueOf(char[] data, int offset, int count); //返回 char 数组参数的特定子数组的字符串表示形式
+- static String	valueOf(double d); //返回 double 参数的字符串表示形式
+- static String	valueOf(float f); //返回 float 参数的字符串表示形式
+- static String	valueOf(int i); //返回 int 参数的字符串表示形式
+- static String	valueOf(long l); //返回 long 参数的字符串表示形式
+- static String	valueOf(Object obj); //返回 Object 参数的字符串表示形式
