@@ -54,3 +54,22 @@
         <td>cpp,java,python</td>
     </tr>
 </table>
+
+2. 任意匹配单个字符 (.)
+
+`.` 匹配除了换行符\n以外的任意字符，例如：
+
+<table>
+    <tr>
+        <th>正则表达式</th>
+        <th>匹配的字符串</th>
+    </tr>
+    <tr>
+        <td>a.c</td>
+        <td>a(任意一个字符)c</td>
+    </tr>
+    <tr>
+        <td>..</td>
+        <td>任意两个字符</td>
+    </tr>
+</table>
