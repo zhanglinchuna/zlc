@@ -185,6 +185,14 @@ str.replaceFirst("c","e"); //结果：66ecffbb
 - String	substring(int beginIndex, int endIndex); //返回一个新字符串，它是此字符串的一个子字符串
 - String	trim(); //忽略字符串前面和后面空格
 
+```java
+String str = "abcdef";
+str.substring(4); //结果：ef
+str.substring(3, 6); //结果：def
+String trim = "    abcdef   ";
+trim.trim(); //结果：abcdef
+```
+
 #### 字符串大小写转换
 
 - String	toLowerCase(); //将此字符串转换为小写
