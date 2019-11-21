@@ -211,3 +211,24 @@
         <td>与[\n\r\t\v\f]相同，与\S相反</td>
     </tr>
 </table>
+
+### 二、java.util.regex API
+
+#### 2.1 Pattern类
+
+- private Pattern(String p, int f) 私有的构造方法，不能通过new创建对象
+- public static Pattern compile(String regex) 参数传入正则表达式，调用静态方法compile创建Pattern对象
+- public static Pattern compile(String regex, int flags) 通过静态方法compile创建Pattern对象，该方法允许设置多个Match Flag
+
+```java
+Pattern.compile("[a-z]",Pattern.CASE_INSENSITIVE); //启用不区分大小写的匹配
+Pattern.compile("[a-z]", Pattern.COMMENTS); //允许空白和注释
+```
+
+- public String pattern()  返回字符串类型的正则表达式，也就是compile函数的regex参数值
+- public Matcher matcher(CharSequence input) 为目标字符串input创建一个Matcher对象
+- public int flags() 返回当前Pattern对象的Match Flag值，如：Pattern.COMMENTS
+- public static boolean matches(String regex, CharSequence input) 通过指定的正则表达式regex对input进行正则匹配
+- public String[] split(CharSequence input) 通过正则表达式对input进行分割
+- public String[] split(CharSequence input, int limit) 通过正则表达式对input进行分割，limit参数指明分割的段数
+- public static String quote(String s) 将字符串s转换为正则字面量，在使用quote()方法之后，原有的字符串s变成了\Qs\E的样式，\Q 代表字面内容的开始，\E 代表字面内容的结束
