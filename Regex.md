@@ -227,8 +227,82 @@ Pattern.compile("[a-z]", Pattern.COMMENTS); //允许空白和注释
 
 - public String pattern()  返回字符串类型的正则表达式，也就是compile函数的regex参数值
 - public Matcher matcher(CharSequence input) 为目标字符串input创建一个Matcher对象
-- public int flags() 返回当前Pattern对象的Match Flag值，如：Pattern.COMMENTS
+- public int flags() 返回当前Pattern对象的Match Flag值，如：Pattern.COMMENTS，Pattern.CASE_INSENSITIVE的值
 - public static boolean matches(String regex, CharSequence input) 通过指定的正则表达式regex对input进行正则匹配
 - public String[] split(CharSequence input) 通过正则表达式对input进行分割
 - public String[] split(CharSequence input, int limit) 通过正则表达式对input进行分割，limit参数指明分割的段数
 - public static String quote(String s) 将字符串s转换为正则字面量，在使用quote()方法之后，原有的字符串s变成了\Qs\E的样式，\Q 代表字面内容的开始，\E 代表字面内容的结束
+
+
+#### 2.2 Matcher类
+
+- public Pattern pattern() 返回创建Matcher对象的Pattern对象
+- public MatchResult toMatchResult() 将匹配结果以MatchResult的形式返回
+- public Matcher usePattern(Pattern newPattern) 修改Matcher对象的Pattern，用以进行新的模式匹配
+- public Matcher reset() 重置匹配器的状态
+- public Matcher reset(CharSequence input) 重置匹配器的状态，重置目标字符串的值为input
+- public int start() 返回当前匹配到的字符串在原目标字符串中的起始索引位置
+- public int start(int group) 返回当前匹配到的字符串中group组在目标字符串的起始索引位置
+- public int end() 返回当前匹配的字符串的最后一个字符在原目标字符串中的offset（偏移量）
+- public int end(int group) 返回当前匹配的字符串中group组的最后一个字符在原目标字符串中的offset（偏移量）
+- public String group() 返回匹配到的字符串，结合find函数使用
+- public String group(int group) 返回匹配到的字符串中的group组的字符串
+- public String group(String name) 返回被named-capturing组捕获的字符串
+- public int groupCount() 返回当前Matcher对象捕获的组的个数
+- public boolean matches() 将整个目标字符串与正则表达式进行匹配，只有完全匹配才能返回true，否则false
+- public boolean find() 对目标字符串进行正则匹配，通过while可以多次执行find方法，获取多次的匹配结果，代码编写方式类似于iterator.next()
+- public boolean find(int start) 在制定的索引位置对目标字符串进行正则匹配
+- public boolean lookingAt() 目标字符串的起始字符串与正则表达式匹配返回true，否则返回false
+- public static String quoteReplacement(String s) 返回字符串s字面意义的替代字符串
+- public Matcher appendReplacement(StringBuffer sb, String replacement) 向sb中追加replacement字符串，replacement字符串中可以包含匹配器中的分组参数，如1，2
+- public StringBuffer appendTail(StringBuffer sb) 将Matcher匹配后的尾部字符串追加至sb中
+
+```java
+Pattern p = Pattern.compile("cat");
+Matcher m = p.matcher("one cat two cats in the yard");
+StringBuffer sb = new StringBuffer();
+while (m.find()) {
+    m.appendReplacement(sb, "dog");
+}
+m.appendTail(sb);
+//执行结果：one dog two dogs in the yard
+```
+- public String replaceAll(String replacement) 将目标字符串中所有满足正则匹配的字符串替换为replacement
+- public String replaceFirst(String replacement) 将目标字符串中第一个满足正则匹配的字符串替换为replacement
+- public Matcher region(int start, int end) 设置目标字符串的匹配范围
+- public int regionStart() 返回匹配器区域的起始点索引位置
+- public int regionEnd() 返回匹配器区域的结束点索引位置
+- public boolean hasTransparentBounds() TransparentBounds标志位：查询TransparentBounds标志位true|false，此标志位默认为false。如果匹配范围不是整个目标字符串，而是一部分，那么如果此标志位设为true的话，则允许顺序环视、逆序环视以及单词分界符超越匹配范围边界的设置，匹配目标字符串的其他部分，也就是可以稍微有越界行为。可以通过useTransparentBounds()进行修改设置
+- public Matcher useTransparentBounds(boolean b) 设置TransparentBounds标志位的值true|false
+
+```java
+// \b 匹配一个字边界，即字与空格间的位置。例如，“er/b”匹配“never”中的“er”，但不匹配“verb”中的“er”
+String regex = "\\bcar\\b";
+String text = "Madagascar is best seen by car or bike.";
+Matcher m = Pattern.compile(regex).matcher(text);
+// TransparentBounds = false，region区域从index=7开始，Madagascar也就是从car开始，匹配器无法感知region区域外的字符，因此第一个car被匹配。
+m.region(7, text.length());
+m.useTransparentBounds(false);
+m.find();
+System.out.println("Matches starting at character " + m.start());
+m.reset();
+// TransparentBounds = true，region区域从index=7开始，Madagascar也就是从car开始，匹配器可以感知region区域外的字符，因此第一个car不被匹配。
+m.useTransparentBounds(true);
+m.find();
+System.out.println("Matches starting at character " + m.start());
+
+/**
+ * 执行结果：
+ *   Matches starting at character 7
+ *   Matches starting at character 27
+ */
+```
+- public boolean hasAnchoringBounds() AnchoringBounds标志位：查询AnchoringBounds标志位的值，此标志位默认为true。在应用正则表达式的时候，我们可以指定目标字符串的检索范围，也就是说在目标字符串的子字符串中应用正则表达式。但此时会有一个问题，那就是 ^ 和 $ 应该匹配整个字符串的开头和结尾呢？ 还是检索范围的起始和结束位置呢？Java 为我们提供了足够的灵活性，我们可以通过下面的方法来查看和设置，默认值是匹配检索范围的起始和结束位置
+    - public Matcher useAnchoringBounds(boolean b) 设置AnchoringBounds标志位的值true|false
+    - public boolean hitEnd()
+    - public boolean requireEnd()
+    - boolean search(int from)
+    - boolean match(int from, int anchor)
+    - int getTextLength() 返回目标字符串的长度
+    - CharSequence getSubSequence(int beginIndex, int endIndex) 获取目标字符串的子字符串
+    - char charAt(int i) 返回目标字符串中索引为i的字符
