@@ -1,0 +1,303 @@
+AbstractApplicationContext.java
+
+// 刷新准备容器
+prepareRefresh();
+	// 在上下文环境中初始化任何占位符属性源。
+	initPropertySources();	// 留给子类实现
+	// 获取系统环境变量 System.getProperties();System.getenv(); ===> AbstractApplicationContext.environment
+	getEnvironment().validateRequiredProperties();
+	// 刷新本地监听器
+	this.earlyApplicationListeners = new LinkedHashSet<>(this.applicationListeners);
+	// 初始化早期的事件
+	this.earlyApplicationEvents = new LinkedHashSet<>();
+
+
+// 告诉子类刷新内部bean工厂
+ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
+	refreshBeanFactory();
+		// if (hasBeanFactory())检查是否已创建容器，如果已创建则销毁bean工厂
+		// 创建bean工厂
+		DefaultListableBeanFactory beanFactory = createBeanFactory();
+			// getInternalParentBeanFactory() 检查是否存在父容器
+			new DefaultListableBeanFactory(getInternalParentBeanFactory());
+		// 给bean工厂设置序列id
+		beanFactory.setSerializationId(getId());
+		// 设置AllowBeanDefinitionOverriding，设置AllowCircularReferences
+		customizeBeanFactory(beanFactory);
+		// 解析bean定义 ===> 解析spring.xml文件
+		loadBeanDefinitions(beanFactory);
+			// 创建xml文件阅读器
+			XmlBeanDefinitionReader beanDefinitionReader = new XmlBeanDefinitionReader(beanFactory);
+			
+			// 给xml文件阅读器设置环境变量
+			beanDefinitionReader.setEnvironment(this.getEnvironment());
+			beanDefinitionReader.setResourceLoader(this);
+			// 设置资源解析器
+			beanDefinitionReader.setEntityResolver(new ResourceEntityResolver(this));
+
+			// 允许子类提供读取器的自定义初始化
+			initBeanDefinitionReader(beanDefinitionReader);
+			// 解析xml文件bean定义
+			loadBeanDefinitions(beanDefinitionReader);
+				// 获取xml文件路径
+				String[] configLocations = getConfigLocations();
+				// 解析bean定义
+				reader.loadBeanDefinitions(configLocations);
+					int count = loadBeanDefinitions(resources);
+						loadBeanDefinitions(new EncodedResource(resource));
+							doLoadBeanDefinitions(inputSource, encodedResource.getResource());
+								// 将解析出来的BeanDefinition注册到容器中
+								int count = registerBeanDefinitions(doc, resource);
+									documentReader.registerBeanDefinitions(doc, createReaderContext(resource));
+										doRegisterBeanDefinitions(doc.getDocumentElement());
+											parseBeanDefinitions(root, this.delegate);
+												parseDefaultElement(ele, delegate);												
+													processBeanDefinition(ele, delegate);
+														BeanDefinitionReaderUtils.registerBeanDefinition(bdHolder, getReaderContext().getRegistry());
+															// BeanDefinition的名称
+															String beanName = definitionHolder.getBeanName();
+															// 将BeanDefinition注册到容器中的beanDefinitionMap属性中
+															registry.registerBeanDefinition(beanName, definitionHolder.getBeanDefinition());
+
+	// 返回已创建的bean工厂 ===> DefaultListableBeanFactory beanFactory = createBeanFactory();														
+	getBeanFactory();
+
+
+// 准备bean工厂以供在此上下文中使用
+prepareBeanFactory(beanFactory);
+	beanFactory.setBeanClassLoader(getClassLoader());
+	// 设置bean表达式解析器，spring el表达式@Value("{url}")
+	beanFactory.setBeanExpressionResolver(new StandardBeanExpressionResolver(beanFactory.getBeanClassLoader()));
+	// 设置属性编辑器，主要是对bean的属性等设置管理一个工具
+	beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this, getEnvironment()));
+	
+	// 注册一个后置处理器，ApplicationContextAwareProcessor作用判断bean是否有实现Aware系列接口
+	beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
+	// 忽略自动装配的接口，如果bean的属性中有实现以下接口，接口的方法参数值注入由ApplicationContextAwareProcessor后置处理器进行处理
+	beanFactory.ignoreDependencyInterface(EnvironmentAware.class);
+	beanFactory.ignoreDependencyInterface(EmbeddedValueResolverAware.class);
+	beanFactory.ignoreDependencyInterface(ResourceLoaderAware.class);
+	beanFactory.ignoreDependencyInterface(ApplicationEventPublisherAware.class);
+	beanFactory.ignoreDependencyInterface(MessageSourceAware.class);
+	beanFactory.ignoreDependencyInterface(ApplicationContextAware.class);
+
+	// 注册可以解析的自动装配，我们可以在任何组件中自动注入
+	beanFactory.registerResolvableDependency(BeanFactory.class, beanFactory);
+	beanFactory.registerResolvableDependency(ResourceLoader.class, this);
+	beanFactory.registerResolvableDependency(ApplicationEventPublisher.class, this);
+	beanFactory.registerResolvableDependency(ApplicationContext.class, this);
+
+	// 注册一个后置处理器，ApplicationListenerDetector作用判断bean是否实现ApplicationListener接口 ===> 是否是一个监听器
+	beanFactory.addBeanPostProcessor(new ApplicationListenerDetector(this));
+	
+	// 检查容器中是否包含名称为loadTimeWeaver的bean，实际上是增加Aspectj的支持
+	// AspectJ采用编译期织入、类加载期织入两种方式进行切面的织入
+    // 类加载期织入简称为LTW（Load Time Weaving）,通过特殊的类加载器来代理JVM默认的类加载器实现
+	if (beanFactory.containsBean(LOAD_TIME_WEAVER_BEAN_NAME)) {
+		// 添加BEAN后置处理器：LoadTimeWeaverAwareProcessor
+        // 在BEAN初始化之前检查BEAN是否实现了LoadTimeWeaverAware接口，如果是，则进行加载时织入，即静态代理。
+		beanFactory.addBeanPostProcessor(new LoadTimeWeaverAwareProcessor(beanFactory));
+		beanFactory.setTempClassLoader(new ContextTypeMatchClassLoader(beanFactory.getBeanClassLoader()));
+	}
+
+	// 注入一些其它信息的bean，比如environment、systemProperties等
+	if (!beanFactory.containsLocalBean(ENVIRONMENT_BEAN_NAME)) {
+		beanFactory.registerSingleton(ENVIRONMENT_BEAN_NAME, getEnvironment());
+	}
+	if (!beanFactory.containsLocalBean(SYSTEM_PROPERTIES_BEAN_NAME)) {
+		beanFactory.registerSingleton(SYSTEM_PROPERTIES_BEAN_NAME, getEnvironment().getSystemProperties());
+	}
+	if (!beanFactory.containsLocalBean(SYSTEM_ENVIRONMENT_BEAN_NAME)) {
+		beanFactory.registerSingleton(SYSTEM_ENVIRONMENT_BEAN_NAME, getEnvironment().getSystemEnvironment());
+	}
+
+try {
+	// 子类实现
+	postProcessBeanFactory(beanFactory);
+
+	// 注册bean工厂后置处理器
+	invokeBeanFactoryPostProcessors(beanFactory);
+		// 获取所有BeanFactoryPostProcessors并调用自己的postProcessBeanFactory方法
+		PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(beanFactory, getBeanFactoryPostProcessors());
+			// 先执行容器AbstractApplicationContext.beanFactoryPostProcessors属性中的BeanFactoryPostProcessor
+			for (BeanFactoryPostProcessor postProcessor : beanFactoryPostProcessors)
+			// 查找所有类型为BeanDefinitionRegistryPostProcessor的bean名称
+			String[] postProcessorNames = beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
+				// 查找类型为BeanDefinitionRegistryPostProcessor类型的BeanFactoryPostProcessor
+				doGetBeanNamesForType(ResolvableType.forRawClass(type), includeNonSingletons, allowEagerInit);
+					// 从容器DefaultListableBeanFactory.beanDefinitionNames属性获取所有bean名称列表，并检查所有的bean定义
+					for (String beanName : this.beanDefinitionNames)
+						// 获取名称为beanName的RootBeanDefinition
+						RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
+							// 先从DefaultListableBeanFactory.mergedBeanDefinitions属性中获取RootBeanDefinition
+							RootBeanDefinition mbd = this.mergedBeanDefinitions.get(beanName);
+							// 如果没有，在从getMergedBeanDefinition方法创建RootBeanDefinition，并返回
+							getMergedBeanDefinition(beanName, getBeanDefinition(beanName)); //getBeanDefinition(beanName) 从DefaultListableBeanFactory.beanDefinitionMap属性中获取RootBeanDefinition
+								// 创建RootBeanDefinition
+								mbd = new RootBeanDefinition(bd);
+								// 将已创建的RootBeanDefinition，放到DefaultListableBeanFactory.mergedBeanDefinitions属性中
+								this.mergedBeanDefinitions.put(beanName, mbd);
+						// 是否实现FactoryBean接口
+						boolean isFactoryBean = isFactoryBean(beanName, mbd);
+						// 判断bean是否是抽象，是否需要懒加载，是否是单实例.....
+						// 判断beanName是否是type类型
+						isTypeMatch(beanName, type);
+						// 如果beanName的类型是type(BeanDefinitionRegistryPostProcessor)类型的，则保存在result集合中
+						if (matchFound) {
+							result.add(beanName);
+						}
+					
+					// 从容器DefaultListableBeanFactory.manualSingletonNames属性获取所有bean定义名称列表，并检查所有手动注册的bean实例(例如：environment、systemProperties、systemEnvironment)
+					for (String beanName : this.manualSingletonNames)
+						// 如果实现FactoryBean接口，则创建该bean对象
+						if (isFactoryBean(beanName))
+						// 判断beanName是否是type类型
+						isTypeMatch(beanName, type);
+						// 如果beanName的类型是type(BeanDefinitionRegistryPostProcessor)类型的，则保存在result集合中
+						if (matchFound) {
+							result.add(beanName);
+						}
+			// 先执行实现了PriorityOrdered接口的BeanDefinitionRegistryPostProcessor.postProcessBeanDefinitionRegistry的方法
+			if (beanFactory.isTypeMatch(ppName, PriorityOrdered.class))
+			// 然后执行实现了Ordered接口的BeanDefinitionRegistryPostProcessor.postProcessBeanDefinitionRegistry的方法
+			if (!processedBeans.contains(ppName) && beanFactory.isTypeMatch(ppName, Ordered.class))
+			// 最后执行未实现任何接口的BeanDefinitionRegistryPostProcessor.postProcessBeanDefinitionRegistry的方法
+			for (String ppName : postProcessorNames)
+				currentRegistryProcessors.add(beanFactory.getBean(ppName, BeanDefinitionRegistryPostProcessor.class));
+					// 创建实现了BeanDefinitionRegistryPostProcessor接口bean对象
+					beanFactory.getBean(ppName, BeanDefinitionRegistryPostProcessor.class)
+						// 先从DefaultListableBeanFactory.singletonObjects属性中获取
+						Object sharedInstance = getSingleton(beanName);
+						// 如果子容器没有，则去父容器寻找bean
+						BeanFactory parentBeanFactory = getParentBeanFactory();
+						// 如果父容器也没有，则新创建bean
+						markBeanAsCreated(beanName);
+							// 先将beanName的RootBeanDefinition定义从DefaultListableBeanFactory.mergedBeanDefinitions删除
+							clearMergedBeanDefinition(beanName);
+							// 将beanName放到至少已经创建过一次的bean集合中DefaultListableBeanFactory.alreadyCreated
+							this.alreadyCreated.add(beanName);
+						// 获取RootBeanDefinition
+						final RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
+							// getBeanDefinition(beanName) 从容器DefaultListableBeanFactory.beanDefinitionMap属性中获取
+							getMergedBeanDefinition(beanName, getBeanDefinition(beanName));
+								// 重新将新获取到的RootBeanDefinition注册到DefaultListableBeanFactory.mergedBeanDefinitions属性中
+								getMergedBeanDefinition(beanName, bd, null);
+									this.mergedBeanDefinitions.put(beanName, mbd);
+						// 检查mbd是否是抽象的
+						checkMergedBeanDefinition(mbd, beanName, args);
+						// 保证当前mbd所依赖的bean的初始化
+						String[] dependsOn = mbd.getDependsOn();
+						// 开始创建bean对象
+						sharedInstance = getSingleton(beanName, () -> {return createBean(beanName, mbd, args);});
+							// 返回新创建的bean对象
+							() -> {return createBean(beanName, mbd, args);
+								// 使用反射创建对象
+								Class<?> resolvedClass = resolveBeanClass(mbd, beanName);
+									doResolveBeanClass(mbd, typesToMatch);
+										mbd.resolveBeanClass(beanClassLoader);
+											// 使用反射Class.forName(ClassName, false, ClassLoader);创建对象
+											Class<?> resolvedClass = ClassUtils.forName(className, classLoader);
+											// 将DefaultListableBeanFactory的类加载器注册到RootBeanDefinition.beanClass属性中
+											this.beanClass = resolvedClass;
+								// 准备方法覆盖。			
+								mbdToUse.prepareMethodOverrides();			
+								// 尝试返回一个代理对象，而不是目标对象
+								Object bean = resolveBeforeInstantiation(beanName, mbdToUse);
+									//执行bean后置处理器InstantiationAwareBeanPostProcessor.postProcessBeforeInstantiation(beanClass, beanName);
+									bean = applyBeanPostProcessorsBeforeInstantiation(targetType, beanName);
+								// 创建目标bean对象
+								Object beanInstance = doCreateBean(beanName, mbdToUse, args);
+									// 创建BeanWrapper，它提供了访问bean的属性值、属性编辑器注册、类型转换等功能
+									instanceWrapper = createBeanInstance(beanName, mbd, args);
+									// 允许后处理程序修改合并的bean定义(RootBeanDefinition)，MergedBeanDefinitionPostProcessor.postProcessMergedBeanDefinition(mbd, beanType, beanName);
+									applyMergedBeanDefinitionPostProcessors(mbd, beanType, beanName);
+									// 将bean注册到DefaultListableBeanFactory.singletonFactories和DefaultListableBeanFactory.registeredSingletons
+									addSingletonFactory(beanName, () -> getEarlyBeanReference(beanName, mbd, bean));
+									// 给bean的属性进行赋值
+									populateBean(beanName, mbd, instanceWrapper);
+									// 调用bean的初始化方法
+									exposedObject = initializeBean(beanName, exposedObject, mbd);
+										// 检查bean是否实现Aware系列接口，给实现接口方法赋值
+										invokeAwareMethods(beanName, bean);
+										// 调用BeanPostProcessor.postProcessBeforeInitialization(Object bean, String beanName)的前置方法，返回一个bean对象
+										wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
+										// (调用bean的初始化方法)如果bean实现了InitializingBean接口，则调用InitializingBean.afterPropertiesSet()的初始化方法
+										invokeInitMethods(beanName, wrappedBean, mbd);
+										// 调用BeanPostProcessor.postProcessAfterInitialization(Object bean, String beanName)的后置方法，返回一个bean对象
+										wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
+									// 从DefaultListableBeanFactory.singletonObjects中获取bean
+									Object earlySingletonReference = getSingleton(beanName, false);
+									// DestructionAwareBeanPostProcessors
+									registerDisposableBeanIfNecessary(beanName, bean, mbd);
+							
+							// DefaultListableBeanFactory.singletonsCurrentlyInCreation中移除beanName
+							afterSingletonCreation(beanName);
+							// 将创建的bean注册到DefaultListableBeanFactory.singletonObjects中，已注册过的单实例bean名称DefaultListableBeanFactory.registeredSingletons
+							addSingleton(beanName, singletonObject);
+			// 执行未实现任何接口的BeanDefinitionRegistryPostProcessor.postProcessBeanDefinitionRegistry(beanFactory);的前置方法
+			invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors, registry);
+			// 执行未实现任何接口的BeanDefinitionRegistryPostProcessor.postProcessBeanFactory(beanFactory);的后置方法
+			invokeBeanFactoryPostProcessors(registryProcessors, beanFactory);
+			// 执行BeanFactoryPostProcessor.postProcessBeanFactory(beanFactory);的方法
+			invokeBeanFactoryPostProcessors(regularPostProcessors, beanFactory);
+			
+			// 查找所有类型为BeanFactoryPostProcessor的bean名称
+			String[] postProcessorNames = beanFactory.getBeanNamesForType(BeanFactoryPostProcessor.class, true, false);
+			// 已经执行过的BeanFactoryPostProcessor，这里就不在执行了
+			if (processedBeans.contains(ppName)) {
+			// 先执行实现了PriorityOrdered接口的BeanFactoryPostProcessor
+			else if (beanFactory.isTypeMatch(ppName, PriorityOrdered.class)) {
+			invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors, registry);
+			// 在执行实现了Ordered接口的BeanFactoryPostProcessor
+			else if (beanFactory.isTypeMatch(ppName, Ordered.class)) {
+			invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors, registry);
+			// 最后执行未实现任何接口的BeanFactoryPostProcessor
+			for (String postProcessorName : nonOrderedPostProcessorNames) {
+			invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors, registry);
+			
+		// 检测LoadTimeWeaver并准备编织，如果同时发现
+		// (e.g. through an @Bean method registered by ConfigurationClassPostProcessor)
+		if (beanFactory.getTempClassLoader() == null && beanFactory.containsBean(LOAD_TIME_WEAVER_BEAN_NAME)) {
+			beanFactory.addBeanPostProcessor(new LoadTimeWeaverAwareProcessor(beanFactory));
+			beanFactory.setTempClassLoader(new ContextTypeMatchClassLoader(beanFactory.getBeanClassLoader()));
+		}
+
+	// 注册bean后置处理器
+	registerBeanPostProcessors(beanFactory);
+		// 查找所有类型为BeanPostProcessor的bean名称
+		String[] postProcessorNames = beanFactory.getBeanNamesForType(BeanPostProcessor.class, true, false);
+		// 容器中已注册的BeanPostProcessor个数 + 1 + 已查询出来的BeanPostProcessor个数
+		int beanProcessorTargetCount = beanFactory.getBeanPostProcessorCount() + 1 + postProcessorNames.length;
+		// 注册BeanPostProcessorChecker来记录信息消息
+		beanFactory.addBeanPostProcessor(new BeanPostProcessorChecker(beanFactory, beanProcessorTargetCount));
+		// 先注册实现了PriorityOrdered接口的PostProcessor后置处理器
+		if (beanFactory.isTypeMatch(ppName, PriorityOrdered.class)) {
+		registerBeanPostProcessors(beanFactory, priorityOrderedPostProcessors);
+		// 在注册实现了Ordered接口的PostProcessor后置处理器
+		else if (beanFactory.isTypeMatch(ppName, Ordered.class)) {
+		registerBeanPostProcessors(beanFactory, orderedPostProcessors);
+		// 最后注册未实现任何接口的PostProcessor后置处理器
+		for (String ppName : nonOrderedPostProcessorNames) {
+		registerBeanPostProcessors(beanFactory, nonOrderedPostProcessors);
+		// 最后注册实现MergedBeanDefinitionPostProcessor接口的PostProcessor后置处理器
+		registerBeanPostProcessors(beanFactory, internalPostProcessors);
+		// 覆盖原来已注册过的ApplicationListenerDetector后置处理器(该后置处理器在prepareBeanFactory方法中注册过)，ApplicationListenerDetector作用判断bean是否实现ApplicationListener接口
+		beanFactory.addBeanPostProcessor(new ApplicationListenerDetector(applicationContext));
+	// Initialize message source for this context.
+	initMessageSource();
+
+	// Initialize event multicaster for this context.
+	initApplicationEventMulticaster();
+
+	// Initialize other special beans in specific context subclasses.
+	onRefresh();
+
+	// Check for listener beans and register them.
+	registerListeners();
+
+	// Instantiate all remaining (non-lazy-init) singletons.
+	finishBeanFactoryInitialization(beanFactory);
+
+	// Last step: publish corresponding event.
+	finishRefresh();
+}
