@@ -1,5 +1,7 @@
 AbstractApplicationContext.java
 
+
+
 // 刷新准备容器
 prepareRefresh();
 	// 在上下文环境中初始化任何占位符属性源。
@@ -225,6 +227,35 @@ try {
 										invokeInitMethods(beanName, wrappedBean, mbd);
 										// 调用BeanPostProcessor.postProcessAfterInitialization(Object bean, String beanName)的后置方法，返回一个bean对象
 										wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
+											// Spring AOP代理对象创建
+											// 遍历所有后置处理器，其中AspectJAwareAdvisorAutoProxyCreator就是用于创建AOP代理对象(Spring AOP原理)
+											for (BeanPostProcessor processor : getBeanPostProcessors()) {
+											// 调用后置处理的的postProcessAfterInitialization方法，返回代理对象
+											Object current = processor.postProcessAfterInitialization(result, beanName);
+												// 由AspectJAwareAdvisorAutoProxyCreator父类AbstractAutoProxyCreator的方法实现
+												return wrapIfNecessary(bean, beanName, cacheKey);
+													// 封装着目标对象、切面类、切入点表达式
+													Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean.getClass(), beanName, null);
+													// 为给定的bean创建AOP代理
+													Object proxy = createProxy(bean.getClass(), beanName, specificInterceptors, new SingletonTargetSource(bean));
+														evaluateProxyInterfaces(beanClass, proxyFactory);
+															// 获取目标对象实现的接口
+															Class<?>[] targetInterfaces = ClassUtils.getAllInterfacesForClass(beanClass, getProxyClassLoader());
+															if (hasReasonableProxyInterface) {
+																// 如果目标对象有实现接口，则把目标对象的接口设置到ProxyFactory的interfaces属性上
+																proxyFactory.addInterface(ifc);
+																// 如果目标对象没有实现接口，则把ProxyFactory的proxyTargetClass属性设置为true
+																proxyFactory.setProxyTargetClass(true);
+														proxyFactory.getProxy(getProxyClassLoader());
+															createAopProxy().getProxy(classLoader);
+																return getAopProxyFactory().createAopProxy(this);
+																	// 如果ProxyFactory的interfaces属性有值，则使用Jdk创建代理对象
+																	if (targetClass.isInterface() || Proxy.isProxyClass(targetClass)) {
+																		return new JdkDynamicAopProxy(config);
+																		// 如果ProxyFactory的interfaces属性没有值，则使用Cglib创建代理对象
+																		return new ObjenesisCglibAopProxy(config);
+																		
+																		
 									// 从DefaultListableBeanFactory.singletonObjects中获取bean
 									Object earlySingletonReference = getSingleton(beanName, false);
 									// DestructionAwareBeanPostProcessors
@@ -283,7 +314,8 @@ try {
 		registerBeanPostProcessors(beanFactory, internalPostProcessors);
 		// 覆盖原来已注册过的ApplicationListenerDetector后置处理器(该后置处理器在prepareBeanFactory方法中注册过)，ApplicationListenerDetector作用判断bean是否实现ApplicationListener接口
 		beanFactory.addBeanPostProcessor(new ApplicationListenerDetector(applicationContext));
-	// Initialize message source for this context.
+		
+	// 国际化相关
 	initMessageSource();
 
 	// Initialize event multicaster for this context.
