@@ -154,6 +154,21 @@ var app = new Vue({
 ```
 > 注意：v-model 只能运用在表单元素中input、button、select、textarea...
 
+- v-if 条件渲染
+
+```html
+<!--当flag的为true时显示h3标签内容，为false不展示-->
+<h3 v-if="flag">这是用v-if控制的元素</h3>
+```
+- v-show 条件渲染
+
+```html
+<!--当flag的为true时显示h3标签内容，为false不展示-->
+<h3 v-show="flag">这是用v-show控制的元素</h3>
+```
+> v-if 的特点：每次都会重新删除或创建元素<br>
+> v-show 的特点： 每次不会重新进行DOM的删除和创建操作，只是切换了元素的 display:none 样式
+
 - v-for 数据遍历
 
 遍历数组
@@ -168,8 +183,7 @@ var vm = new Vue({
     el: '#app',
     data: {
     list: [1, 2, 3]
-    },
-    methods: {}
+    }
 });
 ```
 ```
