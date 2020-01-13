@@ -6,7 +6,220 @@
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 ```
 
-### 二、Vue的常用指令
+### 二、Vue的样式
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <style>
+        .red {
+            color: red; /*红色字体*/
+        }
+
+        .thin {
+            font-weight: 200; /*字体宽度*/
+        }
+
+        .italic {
+            font-style: italic; /*字体倾斜*/
+        }
+
+        .active {
+            letter-spacing: 0.5em; /*字体间隔*/
+        }
+    </style>
+</head>
+
+<body>
+<div id="app">
+
+    <!--  普通的css样式 -->
+    <h1 class="red thin">普通的给类属性添加样式</h1>
+
+    <!-- 使用Vue的方式，直接传递一个数组，注意： 这里的 class 需要使用  v-bind 做数据绑定 -->
+    <h1 :class="['thin', 'italic']">使用Vue的方式，绑定class属性添加样式</h1>
+
+    <!-- 在数组中使用三元表达式 ，当flag为true时active样式生效-->
+    <h1 :class="['thin', 'italic', flag?'active':'']">使用Vue的方式，在class属性中使用三元表达式添加属性</h1>
+
+    <!-- 在数组中使用 对象来代替三元表达式，当flag为true时active样式生效，提高代码的可用性 -->
+    <h1 :class="['thin', 'italic', {'active':flag} ]">使用Vue的方式，在class属性中添加对象，提高代码的可用性</h1>
+
+    <!-- 在为 class 使用 v-bind 绑定 对象的时候，对象的属性是类名，由于 对象的属性可带引号，也可不带引号，所以 这里我没写引号；属性的值 是一个标识符 -->
+    <h1 :class="classObj">使用Vue的方式，在class属性中绑定一个对象</h1>
+
+    <!-- 使用Vue的方式，添加行内样式 -->
+    <h1 :style="styleObj1">Vue中的style样式1</h1>
+
+    <h1 :style="[ styleObj1, styleObj2 ]">Vue中的style样式2</h1>
+</div>
+
+<script>
+    // 创建 Vue 实例，得到 ViewModel
+    var vm = new Vue({
+        el: '#app',
+        data: {
+            flag: true,
+            classObj: {red: true, thin: true, italic: false, active: false},
+            styleObj1: {color: 'red', 'font-weight': 200},
+            styleObj2: {'font-style': 'italic'}
+        }
+    });
+</script>
+</body>
+
+</html>
+```
+
+### 三、事件修饰符
+
+- .prevent 阻止默认行为
+
+.prevent等同于JavaScript的event.preventDefault()，用于取消默认事件。比如我们页面的&lt;a href="#"&gt;标签，当用户点击时，通常在浏览器的网址列出#
+
+```html
+<div id="app">
+    <!--点击下面a链接是并不会跳转到href地址，只是调用了点击事件linkClick方法-->
+    <a href="http://www.baidu.com" @click.prevent="linkClick">百度一下你就知道</a>
+</div>
+```
+```javascript
+var vm = new Vue({
+    el: '#app',
+    methods: {
+       linkClick() {
+            console.log('触发了连接的点击事件')
+        }
+    }
+});
+```
+
+- .capture 捕获触发事件
+
+嵌套两三层父子关系的标签，当我们先点击子节点，就会先触发最外层 父节点 的事件，然后在执行子节点的事件，父节点--> 子节点
+
+```html
+<div id="app">
+    <!--我们点击button按钮，先会执行divHandler方法，然后执行btnHandler方法-->
+    <div class="inner" @click.capture="divHandler">
+      <input type="button" value="按钮" @click="btnHandler">
+    </div>
+</div>
+```
+```javascript
+var vm = new Vue({
+    el: '#app',
+    methods: {
+       divHandler() {
+            console.log('这是触发了 inner div 的点击事件')
+        },
+        btnHandler() {
+            console.log('这是触发了 btn 按钮 的点击事件')
+        }
+    }
+});
+```
+控制台打印：
+
+```
+这是触发了 inner div 的点击事件
+这是触发了 btn 按钮 的点击事件
+```
+
+- .stop 防止事件冒泡
+
+冒泡事件：嵌套两三层父子关系的标签，当我们先点击子节点，就会先触发内层的子节点的事件，然后在执行外层的父节点事件，子节点--> 父节点
+
+```html
+<div id="app">
+    <!--我们点击button按钮，执行btnHandler方法，并不会触发外层div的事件-->
+    <div class="inner" @click="divHandler">
+      <input type="button" value="按钮" @click.stop="btnHandler">
+    </div>
+</div>
+```
+```javascript
+var vm = new Vue({
+    el: '#app',
+    methods: {
+       divHandler() {
+            console.log('这是触发了 inner div 的点击事件')
+        },
+        btnHandler() {
+            console.log('这是触发了 btn 按钮 的点击事件')
+        }
+    }
+});
+```
+控制台打印：
+
+```
+这是触发了 btn 按钮 的点击事件
+```
+
+- .self 只阻止自己范围内的事件
+
+```html
+<!--点击button按钮-->
+<div class="outer" @click="divHandler_outer">
+  <div class="inner" @click.self="divHandler_inner">
+    <input type="button" value="按钮" @click="btnHandler">
+  </div>
+</div>
+```
+```javascript
+var vm = new Vue({
+    el: '#app',
+    methods: {
+       divHandler_inner() {
+            console.log('这是触发了 inner div 的点击事件')
+        },
+        divHandler_outer() {
+            console.log('这是触发了 outer div 的点击事件')
+        },
+        btnHandler() {
+            console.log('这是触发了 btn 按钮 的点击事件')
+        }
+    }
+});
+```
+控制台打印：
+
+```
+这是触发了 btn 按钮 的点击事件
+这是触发了 outer div 的点击事件
+```
+
+- .once 只触发一次事件处理函数
+
+如果我们在@click事件上添加.once修饰符，只要点击按钮只会执行一次linkClick方法，第二次点击直接跳转到a连接的href地址上
+
+```html
+<div id="app">
+    <!--第一次点击下面a链接时会调用linkClick方法，第二次点击直接跳转到a连接的href地址上-->
+    <a href="http://www.baidu.com" @click.prevent.once="linkClick">有问题，先去百度</a>
+</div>
+```
+```javascript
+var vm = new Vue({
+    el: '#app',
+    methods: {
+       linkClick() {
+            console.log('触发了连接的点击事件')
+        }
+    }
+});
+```
+
+
+### 四、Vue的常用指令
 
 - v-cloak
 
@@ -282,214 +495,4 @@ var vm = new Vue({
 });
 ```
 
-### 三、事件修饰符
-
-- .prevent 阻止默认行为
-
-.prevent等同于JavaScript的event.preventDefault()，用于取消默认事件。比如我们页面的&lt;a href="#"&gt;标签，当用户点击时，通常在浏览器的网址列出#
-
-```html
-<div id="app">
-    <!--点击下面a链接是并不会跳转到href地址，只是调用了点击事件linkClick方法-->
-    <a href="http://www.baidu.com" @click.prevent="linkClick">百度一下你就知道</a>
-</div>
-```
-```javascript
-var vm = new Vue({
-    el: '#app',
-    methods: {
-       linkClick() {
-            console.log('触发了连接的点击事件')
-        }
-    }
-});
-```
-
-- .capture 捕获触发事件
-
-嵌套两三层父子关系的标签，当我们先点击子节点，就会先触发最外层 父节点 的事件，然后在执行子节点的事件，父节点--> 子节点
-
-```html
-<div id="app">
-    <!--我们点击button按钮，先会执行divHandler方法，然后执行btnHandler方法-->
-    <div class="inner" @click.capture="divHandler">
-      <input type="button" value="按钮" @click="btnHandler">
-    </div>
-</div>
-```
-```javascript
-var vm = new Vue({
-    el: '#app',
-    methods: {
-       divHandler() {
-            console.log('这是触发了 inner div 的点击事件')
-        },
-        btnHandler() {
-            console.log('这是触发了 btn 按钮 的点击事件')
-        }
-    }
-});
-```
-控制台打印：
-
-```
-这是触发了 inner div 的点击事件
-这是触发了 btn 按钮 的点击事件
-```
-
-- .stop 防止事件冒泡
-
-冒泡事件：嵌套两三层父子关系的标签，当我们先点击子节点，就会先触发内层的子节点的事件，然后在执行外层的父节点事件，子节点--> 父节点
-
-```html
-<div id="app">
-    <!--我们点击button按钮，执行btnHandler方法，并不会触发外层div的事件-->
-    <div class="inner" @click="divHandler">
-      <input type="button" value="按钮" @click.stop="btnHandler">
-    </div>
-</div>
-```
-```javascript
-var vm = new Vue({
-    el: '#app',
-    methods: {
-       divHandler() {
-            console.log('这是触发了 inner div 的点击事件')
-        },
-        btnHandler() {
-            console.log('这是触发了 btn 按钮 的点击事件')
-        }
-    }
-});
-```
-控制台打印：
-
-```
-这是触发了 btn 按钮 的点击事件
-```
-
-- .self 只阻止自己范围内的事件
-
-```html
-<!--点击button按钮-->
-<div class="outer" @click="divHandler_outer">
-  <div class="inner" @click.self="divHandler_inner">
-    <input type="button" value="按钮" @click="btnHandler">
-  </div>
-</div>
-```
-```javascript
-var vm = new Vue({
-    el: '#app',
-    methods: {
-       divHandler_inner() {
-            console.log('这是触发了 inner div 的点击事件')
-        },
-        btnHandler() {
-            console.log('这是触发了 btn 按钮 的点击事件')
-        },
-        divHandler_outer() {
-            console.log('这是触发了 outer div 的点击事件')
-        }
-    }
-});
-```
-控制台打印：
-
-```
-这是触发了 btn 按钮 的点击事件
-这是触发了 outer div 的点击事件
-```
-
-- .once 只触发一次事件处理函数
-
-如果我们在@click事件上添加.once修饰符，只要点击按钮只会执行一次linkClick方法，第二次点击直接跳转到a连接的href地址上
-
-```html
-<div id="app">
-    <!--第一次点击下面a链接时会调用linkClick方法，第二次点击直接跳转到a连接的href地址上-->
-    <a href="http://www.baidu.com" @click.prevent.once="linkClick">有问题，先去百度</a>
-</div>
-```
-```javascript
-var vm = new Vue({
-    el: '#app',
-    methods: {
-       linkClick() {
-            console.log('触发了连接的点击事件')
-        }
-    }
-});
-```
-
-### 三、Vue的样式
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-    <style>
-        .red {
-            color: red; /*红色字体*/
-        }
-
-        .thin {
-            font-weight: 200; /*字体宽度*/
-        }
-
-        .italic {
-            font-style: italic; /*字体倾斜*/
-        }
-
-        .active {
-            letter-spacing: 0.5em; /*字体间隔*/
-        }
-    </style>
-</head>
-
-<body>
-<div id="app">
-
-    <!--  普通的css样式 -->
-    <h1 class="red thin">普通的给类属性添加样式</h1>
-
-    <!-- 使用Vue的方式，直接传递一个数组，注意： 这里的 class 需要使用  v-bind 做数据绑定 -->
-    <h1 :class="['thin', 'italic']">使用Vue的方式，绑定class属性添加样式</h1>
-
-    <!-- 在数组中使用三元表达式 ，当flag为true时active样式生效-->
-    <h1 :class="['thin', 'italic', flag?'active':'']">使用Vue的方式，在class属性中使用三元表达式添加属性</h1>
-
-    <!-- 在数组中使用 对象来代替三元表达式，当flag为true时active样式生效，提高代码的可用性 -->
-    <h1 :class="['thin', 'italic', {'active':flag} ]">使用Vue的方式，在class属性中添加对象，提高代码的可用性</h1>
-
-    <!-- 在为 class 使用 v-bind 绑定 对象的时候，对象的属性是类名，由于 对象的属性可带引号，也可不带引号，所以 这里我没写引号；属性的值 是一个标识符 -->
-    <h1 :class="classObj">使用Vue的方式，在class属性中绑定一个对象</h1>
-
-    <!-- 使用Vue的方式，添加行内样式 -->
-    <h1 :style="styleObj1">Vue中的style样式1</h1>
-
-    <h1 :style="[ styleObj1, styleObj2 ]">Vue中的style样式2</h1>
-</div>
-
-<script>
-    // 创建 Vue 实例，得到 ViewModel
-    var vm = new Vue({
-        el: '#app',
-        data: {
-            flag: true,
-            classObj: {red: true, thin: true, italic: false, active: false},
-            styleObj1: {color: 'red', 'font-weight': 200},
-            styleObj2: {'font-style': 'italic'}
-        }
-    });
-</script>
-</body>
-
-</html>
-```
+### 五、自定义指令
