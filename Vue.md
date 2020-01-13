@@ -154,6 +154,120 @@ var app = new Vue({
 ```
 > 注意：v-model 只能运用在表单元素中input、button、select、textarea...
 
+- v-for 数据遍历
+
+遍历数组
+
+```html
+<div id="app">
+    <p v-for="(item, i) in list">索引值：{{i}} --- 每一项：{{item}}</p>
+</div>
+```
+```javascript
+var vm = new Vue({
+    el: '#app',
+    data: {
+    list: [1, 2, 3]
+    },
+    methods: {}
+});
+```
+```
+索引值：0 --- 每一项：1
+索引值：1 --- 每一项：2
+索引值：2 --- 每一项：3
+```
+遍历对象数组
+
+```html
+<div id="app">
+    <p v-for="(user, i) in list" :key="user.id>Id：{{ user.id }} --- 名字：{{ user.name }} --- 索引：{{i}}</p>
+</div>
+```
+```javascript
+var vm = new Vue({
+    el: '#app',
+    data: {
+        list: [
+              { id: 1, name: 'zs1' },
+              { id: 2, name: 'zs2' },
+              { id: 3, name: 'zs3' }
+            ]
+    }
+});
+```
+```
+Id：1 --- 名字：zs1 --- 索引：0
+Id：2 --- 名字：zs2 --- 索引：1
+Id：3 --- 名字：zs3 --- 索引：2
+```
+
+遍历对象
+
+```html
+<div id="app">
+    <!-- 注意：在遍历对象身上的键值对的时候， 除了 有  val  key  ,在第三个位置还有 一个 索引  -->
+    <p v-for="(val, key, i) in user">值是： {{ val }} --- 键是： {{key}} --- 索引： {{i}}</p>
+</div>
+```
+```javascript
+var vm = new Vue({
+    el: '#app',
+    data: {
+        user: {
+          id: 1,
+          name: '张三',
+          gender: '男'
+        }
+    }
+});
+```
+```
+值是： 1 --- 键是： id --- 索引： 0
+值是： 张三 --- 键是： name --- 索引： 1
+值是： 男 --- 键是： gender --- 索引： 2
+```
+
+遍历数字
+
+```html
+<div id="app">
+    <!-- in 后面我们放过  普通数组，对象数组，对象， 还可以放数字 -->
+    <!-- 注意：如果使用 v-for 迭代数字的话，前面的 count 值从 1 开始 -->
+    <p v-for="count in 5">这是第 {{ count }} 次循环</p>
+</div>
+```
+```
+这是第 1 次循环
+这是第 2 次循环
+这是第 3 次循环
+这是第 4 次循环
+这是第 5 次循环
+```
+
+v-for 循环的时候，使用 key 属性指定 唯一的 字符串/数字 类型
+
+```html
+<div id="app">
+    <!-- 注意： v-for 循环的时候，key 属性只能使用 number获取string -->
+    <!-- 注意： key 在使用的时候，必须使用 v-bind 属性绑定的形式，指定 key 的值 -->
+    <!-- 在组件中，使用v-for循环的时候，或者在一些特殊情况中，如果 v-for 有问题，必须 在使用 v-for 的同时，指定 唯一的 字符串/数字 类型 :key 值 -->
+    <p v-for="(user, i) in list" :key="user.id>Id：{{ user.id }} --- 名字：{{ user.name }} --- 索引：{{i}}</p>
+</div>
+```
+```javascript
+var vm = new Vue({
+    el: '#app',
+    data: {
+        list: [
+              { id: 1, name: 'zs1' },
+              { id: 2, name: 'zs2' },
+              { id: 3, name: 'zs3' }
+            ]
+    }
+});
+```
+
 ### 三、事件修饰符
 
 - .prevent 阻止默认行为
@@ -167,7 +281,7 @@ var app = new Vue({
 </div>
 ```
 ```javascript
-var app = new Vue({
+var vm = new Vue({
     el: '#app',
     methods: {
        linkClick() {
@@ -190,7 +304,7 @@ var app = new Vue({
 </div>
 ```
 ```javascript
-var app = new Vue({
+var vm = new Vue({
     el: '#app',
     methods: {
        divHandler() {
@@ -222,7 +336,7 @@ var app = new Vue({
 </div>
 ```
 ```javascript
-var app = new Vue({
+var vm = new Vue({
     el: '#app',
     methods: {
        divHandler() {
@@ -251,7 +365,7 @@ var app = new Vue({
 </div>
 ```
 ```javascript
-var app = new Vue({
+var vm = new Vue({
     el: '#app',
     methods: {
        divHandler_inner() {
@@ -284,7 +398,7 @@ var app = new Vue({
 </div>
 ```
 ```javascript
-var app = new Vue({
+var vm = new Vue({
     el: '#app',
     methods: {
        linkClick() {
