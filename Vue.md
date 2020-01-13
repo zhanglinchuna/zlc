@@ -32,8 +32,8 @@ var app = new Vue({
 使用`v-cloak`可以解决网络慢环境下页面中表达式显示问题
 
 ```html
-<div id="app" v-cloak>
-    +++{{msg}}+++
+<div id="app">
+    <h4 v-cloak="msg">+++{{msg}}+++</h4>
 </div>
 ```
 页面显示：
@@ -64,7 +64,7 @@ hello
 
 ```html
 <div id="app">
-    +++{{msg2}}+++
+    <h4 v-html="msg">+++你好+++</h4>
 </div>
 ```
 ```javascript
@@ -82,10 +82,12 @@ var app = new Vue({
 - v-bind 属性绑定指令
 
 ```html
-<!--给input标签绑定一个value属性-->
-<input type="button" v-bind:value="value">
-<!--v-bind指令可以简写 : -->
-<!--<input type="button" :value="value">-->
+<div id="app">
+    <!--给input标签绑定一个value属性-->
+    <input type="button" v-bind:value="value">
+    <!--v-bind指令可以简写 : -->
+    <!--<input type="button" :value="value">-->
+</div>
 ```
 ```javascript
 <script>
@@ -103,10 +105,12 @@ var app = new Vue({
 - v-on 事件绑定指令
 
 ```html
+<div id="app">
 <!--给input标签绑定一个点击事件-->
 <input type="button" value="按钮" v-on:click=="show('test')">
 <!--v-on指令可以简写 @ -->
 <!--<input type="button" value="按钮" @click="show('test')">-->
+</div>
 ```
 ```javascript
 <script>
@@ -125,3 +129,12 @@ var app = new Vue({
 });
 </script>
 ```
+
+- v-model 双向数据绑定
+
+`v-bind` 只能实现数据的单向绑定，修改Vue实例data属性改变页面中value的值，而无法实现数据的双向绑定，修改页面中value的值Vue实例data属性不会改变
+
+`v-model` 指令，可以实现页面表单元素和 Model 中数据的双向数据绑定
+
+> 注意：v-model 只能运用在表单元素中input、button、select、textarea...
+
