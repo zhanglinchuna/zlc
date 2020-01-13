@@ -158,7 +158,7 @@ var app = new Vue({
 
 - .prevent 阻止默认行为
 
-.prevent等同于JavaScript的event.preventDefault()，用于取消默认事件。比如我们页面的<a href="#">标签，当用户点击时，通常在浏览器的网址列出#
+.prevent等同于JavaScript的event.preventDefault()，用于取消默认事件。比如我们页面的&lt;a href="#"&gt;标签，当用户点击时，通常在浏览器的网址列出#
 
 ```html
 <div id="app">
