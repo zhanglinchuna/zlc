@@ -78,3 +78,50 @@ var app = new Vue({
 });
 </script>
 ```
+
+- v-bind 属性绑定指令
+
+```html
+<!--给input标签绑定一个value属性-->
+<input type="button" v-bind:value="value">
+<!--v-bind指令可以简写 : -->
+<!--<input type="button" :value="value">-->
+```
+```javascript
+<script>
+var app = new Vue({
+    el: '#app',
+    data: {
+        msg:'hello',
+        msg2:'<h1>h1的 hello</h1>',
+        value:'按钮'
+    }
+});
+</script>
+```
+
+- v-on 事件绑定指令
+
+```html
+<!--给input标签绑定一个点击事件-->
+<input type="button" value="按钮" v-on:click=="show('test')">
+<!--v-on指令可以简写 @ -->
+<!--<input type="button" value="按钮" @click="show('test')">-->
+```
+```javascript
+<script>
+var app = new Vue({
+    el: '#app',
+    data: {
+        msg:'hello',
+        msg2:'<h1>h1的 hello</h1>',
+        value:'按钮'
+    },
+    methods: { // 这个 methods属性中定义了当前Vue实例所有可用的方法
+        show: function (args) {
+          alert(this.msg + args)
+        }
+    }
+});
+</script>
+```
