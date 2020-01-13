@@ -218,8 +218,39 @@ var vm = new Vue({
 });
 ```
 
+### 四、键盘修饰符
 
-### 四、Vue的常用指令
+#### 4.1 通过Vue.config.keyCodes.名称 = 按键值 来自定义案件修饰符的别名：
+
+```
+Vue.config.keyCodes.enter = 13;
+```
+
+#### 4.2 使用自定义的按键修饰符
+
+```
+<input type="text" @keyup.enter="add()">
+```
+enter键抬起事件
+
+```html
+<div id="app">
+    <input type="text" @keyup.enter="add()"><br>
+</div>
+<script>
+    Vue.config.keyCodes.enter = 13;
+    var vm = new Vue({
+        el: "#app",
+        methods: {
+            add: function () {
+                console.log("enter键抬起事件")
+            }
+        }
+    });
+</script>
+```
+
+### 五、Vue的常用指令
 
 - v-cloak
 
