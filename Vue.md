@@ -171,8 +171,8 @@ var app = new Vue({
     el: '#app',
     methods: {
        linkClick() {
-                console.log('触发了连接的点击事件')
-            }
+            console.log('触发了连接的点击事件')
+        }
     }
 });
 ```
@@ -194,8 +194,8 @@ var app = new Vue({
     el: '#app',
     methods: {
        divHandler() {
-                console.log('这是触发了 inner div 的点击事件')
-            },
+            console.log('这是触发了 inner div 的点击事件')
+        },
         btnHandler() {
             console.log('这是触发了 btn 按钮 的点击事件')
         }
@@ -209,13 +209,15 @@ var app = new Vue({
 这是触发了 btn 按钮 的点击事件
 ```
 
-- .self 只触发自己范围内的事件
+- .stop 防止事件冒泡
+
+冒泡事件：嵌套两三层父子关系的标签，当我们先点击子节点，就会先触发内层的子节点的事件，然后在执行外层的父节点事件，子节点--> 父节点
 
 ```html
 <div id="app">
-    <!--我们点击button按钮，并不会触发外层div的点击事件，只会执行自己的事件方法-->
-    <div class="inner" @click.capture="divHandler">
-      <input type="button" value="按钮" @click="btnHandler">
+    <!--我们点击button按钮，执行btnHandler方法，并不会触发外层div的事件-->
+    <div class="inner" @click="divHandler">
+      <input type="button" value="按钮" @click.stop="btnHandler">
     </div>
 </div>
 ```
@@ -224,8 +226,8 @@ var app = new Vue({
     el: '#app',
     methods: {
        divHandler() {
-                console.log('这是触发了 inner div 的点击事件')
-            },
+            console.log('这是触发了 inner div 的点击事件')
+        },
         btnHandler() {
             console.log('这是触发了 btn 按钮 的点击事件')
         }
@@ -237,3 +239,58 @@ var app = new Vue({
 ```
 这是触发了 btn 按钮 的点击事件
 ```
+
+- .self 只阻止自己范围内的事件
+
+```html
+<!--点击button按钮-->
+<div class="outer" @click="divHandler_outer">
+  <div class="inner" @click.self="divHandler_inner">
+    <input type="button" value="按钮" @click="btnHandler">
+  </div>
+</div>
+```
+```javascript
+var app = new Vue({
+    el: '#app',
+    methods: {
+       divHandler_inner() {
+            console.log('这是触发了 inner div 的点击事件')
+        },
+        btnHandler() {
+            console.log('这是触发了 btn 按钮 的点击事件')
+        },
+        divHandler_outer() {
+            console.log('这是触发了 outer div 的点击事件')
+        }
+    }
+});
+```
+控制台打印：
+
+```
+这是触发了 btn 按钮 的点击事件
+这是触发了 outer div 的点击事件
+```
+
+- .once 只触发一次事件处理函数
+
+如果我们在@click事件上添加.once修饰符，只要点击按钮只会执行一次linkClick方法，第二次点击直接跳转到a连接的href地址上
+
+```html
+<div id="app">
+    <!--第一次点击下面a链接时会调用linkClick方法，第二次点击直接跳转到a连接的href地址上-->
+    <a href="http://www.baidu.com" @click.prevent.once="linkClick">有问题，先去百度</a>
+</div>
+```
+```javascript
+var app = new Vue({
+    el: '#app',
+    methods: {
+       linkClick() {
+            console.log('触发了连接的点击事件')
+        }
+    }
+});
+```
+
