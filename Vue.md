@@ -153,3 +153,87 @@ var app = new Vue({
 </script>
 ```
 > 注意：v-model 只能运用在表单元素中input、button、select、textarea...
+
+### 三、事件修饰符
+
+- .prevent 阻止默认行为
+
+.prevent等同于JavaScript的event.preventDefault()，用于取消默认事件。比如我们页面的<a href="#">标签，当用户点击时，通常在浏览器的网址列出#
+
+```html
+<div id="app">
+    <!--点击下面a链接是并不会跳转到href地址，只是调用了点击事件linkClick方法-->
+    <a href="http://www.baidu.com" @click.prevent="linkClick">百度一下你就知道</a>
+</div>
+```
+```javascript
+var app = new Vue({
+    el: '#app',
+    methods: {
+       linkClick() {
+                console.log('触发了连接的点击事件')
+            }
+    }
+});
+```
+
+- .capture 捕获触发事件
+
+嵌套两三层父子关系的标签，当我们先点击子节点，就会先触发最外层 父节点 的事件，然后在执行子节点的事件，父节点--> 子节点
+
+```html
+<div id="app">
+    <!--我们点击button按钮，先会执行divHandler方法，然后执行btnHandler方法-->
+    <div class="inner" @click.capture="divHandler">
+      <input type="button" value="按钮" @click="btnHandler">
+    </div>
+</div>
+```
+```javascript
+var app = new Vue({
+    el: '#app',
+    methods: {
+       divHandler() {
+                console.log('这是触发了 inner div 的点击事件')
+            },
+        btnHandler() {
+            console.log('这是触发了 btn 按钮 的点击事件')
+        }
+    }
+});
+```
+控制台打印：
+
+```
+这是触发了 inner div 的点击事件
+这是触发了 btn 按钮 的点击事件
+```
+
+- .self 只触发自己范围内的事件
+
+```html
+<div id="app">
+    <!--我们点击button按钮，并不会触发外层div的点击事件，只会执行自己的事件方法-->
+    <div class="inner" @click.capture="divHandler">
+      <input type="button" value="按钮" @click="btnHandler">
+    </div>
+</div>
+```
+```javascript
+var app = new Vue({
+    el: '#app',
+    methods: {
+       divHandler() {
+                console.log('这是触发了 inner div 的点击事件')
+            },
+        btnHandler() {
+            console.log('这是触发了 btn 按钮 的点击事件')
+        }
+    }
+});
+```
+控制台打印：
+
+```
+这是触发了 btn 按钮 的点击事件
+```
