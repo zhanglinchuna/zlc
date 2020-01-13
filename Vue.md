@@ -294,3 +294,74 @@ var app = new Vue({
 });
 ```
 
+### 三、Vue的样式
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="./lib/vue-2.4.0.js"></script>
+    <style>
+        .red {
+            color: red; /*红色字体*/
+        }
+
+        .thin {
+            font-weight: 200; /*字体宽度*/
+        }
+
+        .italic {
+            font-style: italic; /*字体倾斜*/
+        }
+
+        .active {
+            letter-spacing: 0.5em; /*字体间隔*/
+        }
+    </style>
+</head>
+
+<body>
+<div id="app">
+
+    <!--  普通的css样式 -->
+    <h1 class="red thin">普通的给类属性添加样式</h1>
+
+    <!-- 使用Vue的方式，直接传递一个数组，注意： 这里的 class 需要使用  v-bind 做数据绑定 -->
+    <h1 :class="['thin', 'italic']">使用Vue的方式，绑定class属性添加样式</h1>
+
+    <!-- 在数组中使用三元表达式 ，当flag为true时active样式生效-->
+    <h1 :class="['thin', 'italic', flag?'active':'']">使用Vue的方式，在class属性中使用三元表达式添加属性</h1>
+
+    <!-- 在数组中使用 对象来代替三元表达式，当flag为true时active样式生效，提高代码的可用性 -->
+    <h1 :class="['thin', 'italic', {'active':flag} ]">使用Vue的方式，在class属性中添加对象，提高代码的可用性</h1>
+
+    <!-- 在为 class 使用 v-bind 绑定 对象的时候，对象的属性是类名，由于 对象的属性可带引号，也可不带引号，所以 这里我没写引号；属性的值 是一个标识符 -->
+    <h1 :class="classObj">使用Vue的方式，在class属性中绑定一个对象</h1>
+
+    <!-- 使用Vue的方式，添加行内样式 -->
+    <h1 :style="styleObj1">Vue中的style样式1</h1>
+
+    <h1 :style="[ styleObj1, styleObj2 ]">Vue中的style样式2</h1>
+</div>
+
+<script>
+    // 创建 Vue 实例，得到 ViewModel
+    var vm = new Vue({
+        el: '#app',
+        data: {
+            flag: true,
+            classObj: {red: true, thin: true, italic: false, active: false},
+            styleObj1: {color: 'red', 'font-weight': 200},
+            styleObj2: {'font-style': 'italic'}
+        }
+    });
+</script>
+</body>
+
+</html>
+```
