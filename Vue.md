@@ -527,3 +527,53 @@ var vm = new Vue({
 ```
 
 ### 五、自定义指令
+
+#### 5.1 自定义全局指令
+
+```html
+<div id="app">
+    <p>页面载入时，input 元素自动获取焦点：</p>
+    <input v-focus>
+</div>
+ 
+<script>
+// 注册一个全局自定义指令 v-focus
+Vue.directive('focus', {
+  // inserted 表示被绑定元素插入父节点时调用
+  inserted: function (el) {
+    // 聚焦元素
+    el.focus()
+  }
+})
+// 创建根实例
+new Vue({
+  el: '#app'
+})
+</script>
+```
+
+#### 5.1 自定义局部指令
+
+```html
+<div id="app">
+    <p v-color="'red'">自定义指令为字体设置颜色</p><br>
+    <p v-font-weight="800">自定义指令为字体设置宽度</p>
+</div>
+ 
+<script>
+// 创建根实例
+new Vue({
+  el: '#app',
+  directives: {
+        color: { // 为元素设置指定的字体颜色
+            bind(el, binding) {
+                el.style.color = binding.value;
+            }
+        },
+        'font-weight': function (el, binding2) { // 自定义指令的简写形式，等同于定义了 bind 和 update 两个钩子函数
+            el.style.fontWeight = binding2.value;
+        }
+    }
+})
+</script>
+```
