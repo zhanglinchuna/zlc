@@ -55,4 +55,5 @@ Vue.filter('dateFormat', function (el, fmt) {
 var vm = new Vue({
     el: "#app"
 })
+</script>
 ```
