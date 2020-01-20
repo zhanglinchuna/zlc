@@ -72,3 +72,37 @@
     });
 </script>
 ```
+
+### Vue组件中的data和methods
+
+1. 组件中的data必须是一个方法，且这个方法的返回值必须是一个对象。
+2. 组件中的methods要想使用组件中的data数据，需要this.属性。
+
+```html
+<div id="app">
+    <mycom></mycom><br>
+    <mycom></mycom><br>
+    <mycom></mycom>
+</div>
+
+<script>
+    Vue.component('mycom', {
+        template: "<div><h1>这是全局组件 --- {{msg}} --- {{count}}</h1><br><input type='button' value='点击' @click='increment()'/> </div>",
+        data: function () {
+            return {
+                count: 0,
+                msg: "这是组件的中data定义的数据"
+            }
+        },
+        methods: {
+            increment() {
+                this.count++
+            }
+        }
+    })
+
+    let vm = new Vue({
+        el: "#app",
+    });
+</script>
+```
