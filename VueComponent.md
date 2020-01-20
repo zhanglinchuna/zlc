@@ -52,7 +52,7 @@
     <global-com></global-com>
     <my-com></my-com>
 </div>
-<!-- 在VM实例外面,使用 template 元素,定义组件的HTML模板结构  -->
+<!-- 在 VM 实例控制区域的外面,使用 template 元素,定义组件的HTML模板结构  -->
 <template id="tem">
     <div><p>这是通过 template 标签，创建的组件</p></div>
 </template>
