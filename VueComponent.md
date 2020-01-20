@@ -44,3 +44,31 @@
 ```
 
 #### 创建组件的方式3
+
+使用 template 标签创建Vue组件
+
+```html
+<div id="app">
+    <global-com></global-com>
+    <my-com></my-com>
+</div>
+<!-- 在VM实例外面,使用 template 元素,定义组件的HTML模板结构  -->
+<template id="tem">
+    <div><p>这是通过 template 标签，创建的组件</p></div>
+</template>
+<script>
+    //定义全局组件
+    Vue.component('globalCom', {
+        template: "#tem"
+    })
+
+    let vm = new Vue({
+        el: "#app",
+        components: {   //只能在 #app 内使用的局部组件
+            myCom: {
+                template: "#tem"
+            }
+        }
+    });
+</script>
+```
