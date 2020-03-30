@@ -8,7 +8,7 @@
 var vm = new Vue({
     el: "#app",
     filters: {
-        dateFormat(el, fmt) {
+        dateFormat(el, fmt) {  //el:需要过滤的元素本身； fmt:过滤方法的参数'YYYY-mm-dd HH:MM'
             // 获取年月日
             let y = el.getFullYear();
             let m = (el.getMonth() + 1).toString().padStart(2, '0');
