@@ -1,3 +1,4 @@
+```html
 <body>
 <div id="app">
 
@@ -42,3 +43,4 @@
     });
 </script>
 </body>
+```
