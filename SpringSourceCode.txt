@@ -53,14 +53,53 @@ ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 									documentReader.registerBeanDefinitions(doc, createReaderContext(resource));
 										doRegisterBeanDefinitions(doc.getDocumentElement());
 											parseBeanDefinitions(root, this.delegate);
-												parseDefaultElement(ele, delegate);												
-													processBeanDefinition(ele, delegate);
+												parseDefaultElement(ele, delegate);
+													// ***spring_xml配置版注册beanDefinition流程***
+													/**processBeanDefinition(ele, delegate);
 														BeanDefinitionReaderUtils.registerBeanDefinition(bdHolder, getReaderContext().getRegistry());
 															// BeanDefinition的名称
 															String beanName = definitionHolder.getBeanName();
 															// 将BeanDefinition注册到容器中的beanDefinitionMap属性中
-															registry.registerBeanDefinition(beanName, definitionHolder.getBeanDefinition());
-
+															registry.registerBeanDefinition(beanName, definitionHolder.getBeanDefinition());*/
+													// ***spring_annotation配置版注册beanDefinition流程***
+													delegate.parseCustomElement(ele);
+														handler.parse(ele, new ParserContext(this.readerContext, this, containingBd));
+															// 先获取BeanDefinition解析器，然后在执行parse方法
+															findParserForElement(element, parserContext).parse(element, parserContext);
+																// 创建BeanDefinition扫描器
+																ClassPathBeanDefinitionScanner scanner = configureScanner(parserContext, element);
+																// 扫描bean定义并注册它们
+																Set<BeanDefinitionHolder> beanDefinitions = scanner.doScan(basePackages);
+																	Set<BeanDefinition> candidates = findCandidateComponents(basePackage);
+																		// 查找项目spring.xml路径下所有.class文件
+																		Resource[] resources = this.resourcePatternResolver.getResources(packageSearchPath);
+																		// 判断类上是否标记有@Component、@ManagedBean、@Named注解
+																		isCandidateComponent(metadataReader)
+																		// 确定给定的bean定义是否具有候选资格
+																		isCandidateComponent(sbd)
+																		candidates.add(sbd); // 添加到候选名单中 Set<BeanDefinition> candidates = new LinkedHashSet<BeanDefinition>();
+																	// 给bean取一个名称，如果bean未指定名称，则默认名称为类的名名（类名开头小写）
+																	String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
+																	// 处理注解Bean定义中的通用注解
+																	AnnotationConfigUtils.processCommonDefinitionAnnotations((AnnotatedBeanDefinition) candidate);
+																		if (metadata.isAnnotated(Lazy.class.getName()))	// 如果配置了@Lazy注解，则设置该Bean为非延迟初始化
+																		if (metadata.isAnnotated(Primary.class.getName())) // 如果配置了@Primary注解，设置该Bean为autowiring自动依赖注入装//配时的首选
+																		if (metadata.isAnnotated(DependsOn.class.getName())) // 如果Bean定义中有@ DependsOn注解，则为该Bean设置所依赖的Bean名称，
+																		if (metadata.isAnnotated(Role.class.getName()))
+																		if (metadata.isAnnotated(Description.class.getName()))
+																	// 将BeanDefinition注册到容器中
+																	registerBeanDefinition(definitionHolder, this.registry);
+																//注册其他注解组件
+																registerComponents(parserContext.getReaderContext(), beanDefinitions, element);
+																	// 向容器中注册多个BeanPostProcessor
+																	Set<BeanDefinitionHolder> processorDefinitions = AnnotationConfigUtils.registerAnnotationConfigProcessors(readerContext.getRegistry(), source);
+																		RootBeanDefinition def = new RootBeanDefinition(ConfigurationClassPostProcessor.class); // 解析`@Configuration`注解类
+																		RootBeanDefinition def = new RootBeanDefinition(AutowiredAnnotationBeanPostProcessor.class); // 解析`@Autowired/@Value`注解
+																		RootBeanDefinition def = new RootBeanDefinition(RequiredAnnotationBeanPostProcessor.class); // 解析`@Required`注解
+																		RootBeanDefinition def = new RootBeanDefinition(CommonAnnotationBeanPostProcessor.class); // 解析`@Resource`注解
+																		def.setBeanClass(ClassUtils.forName(PERSISTENCE_ANNOTATION_PROCESSOR_CLASS_NAME,AnnotationConfigUtils.class.getClassLoader())); // 解析JPA注解，持久层
+																		... 
+																		
 	// 返回已创建的bean工厂 ===> DefaultListableBeanFactory beanFactory = createBeanFactory();														
 	getBeanFactory();
 
