@@ -26,7 +26,7 @@ ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 		beanFactory.setSerializationId(getId());
 		// 设置AllowBeanDefinitionOverriding，设置AllowCircularReferences
 		customizeBeanFactory(beanFactory);
-		// 解析bean定义 ===> 解析spring.xml文件
+		// 解析xml配置文件中的bean定义信息，包装成BeanDefinition对象 ===> 解析spring.xml文件
 		loadBeanDefinitions(beanFactory);
 			// 创建xml文件阅读器
 			XmlBeanDefinitionReader beanDefinitionReader = new XmlBeanDefinitionReader(beanFactory);
@@ -242,10 +242,34 @@ try {
 											this.beanClass = resolvedClass;
 								// 准备方法覆盖。			
 								mbdToUse.prepareMethodOverrides();			
-								// 尝试返回一个代理对象，而不是目标对象
+								// 尝试返回一个代理对象，而不是目标对象 ===》后置处理器 AnnotationAwareAspectJAutoProxyCreator（AOP原理）
 								Object bean = resolveBeforeInstantiation(beanName, mbdToUse);
 									//执行bean后置处理器InstantiationAwareBeanPostProcessor.postProcessBeforeInstantiation(beanClass, beanName);
-									bean = applyBeanPostProcessorsBeforeInstantiation(targetType, beanName);
+									bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
+										// 调用后置处理的的postProcessAfterInitialization方法，返回代理对象
+										result = beanProcessor.postProcessAfterInitialization(result, beanName);
+											// 由AspectJAwareAdvisorAutoProxyCreator父类AbstractAutoProxyCreator的方法实现
+											return wrapIfNecessary(bean, beanName, cacheKey);
+												// 封装着目标对象、切面类、切入点表达式
+												Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean.getClass(), beanName, null);
+												// 为给定的bean创建AOP代理
+												Object proxy = createProxy(bean.getClass(), beanName, specificInterceptors, new SingletonTargetSource(bean));
+													evaluateProxyInterfaces(beanClass, proxyFactory);
+														// 获取目标对象实现的接口
+														Class<?>[] targetInterfaces = ClassUtils.getAllInterfacesForClass(beanClass, getProxyClassLoader());
+														if (hasReasonableProxyInterface) {
+															// 如果目标对象有实现接口，则把目标对象的接口设置到ProxyFactory的interfaces属性上
+															proxyFactory.addInterface(ifc);
+															// 如果目标对象没有实现接口，则把ProxyFactory的proxyTargetClass属性设置为true
+															proxyFactory.setProxyTargetClass(true);
+													proxyFactory.getProxy(getProxyClassLoader());
+														createAopProxy().getProxy(classLoader);
+															return getAopProxyFactory().createAopProxy(this);
+																// 如果ProxyFactory的interfaces属性有值，则使用Jdk创建代理对象
+																if (targetClass.isInterface() || Proxy.isProxyClass(targetClass)) {
+																	return new JdkDynamicAopProxy(config);
+																	// 如果ProxyFactory的interfaces属性没有值，则使用Cglib创建代理对象
+																	return new ObjenesisCglibAopProxy(config);
 								// 创建目标bean对象
 								Object beanInstance = doCreateBean(beanName, mbdToUse, args);
 									// 创建BeanWrapper，它提供了访问bean的属性值、属性编辑器注册、类型转换等功能
@@ -256,45 +280,37 @@ try {
 									addSingletonFactory(beanName, () -> getEarlyBeanReference(beanName, mbd, bean));
 									// 给bean的属性进行赋值
 									populateBean(beanName, mbd, instanceWrapper);
+										// 获取bean的所有需要设置属性
+										PropertyValues pvs = mbd.getPropertyValues();
+										// bean属性设置
+										applyPropertyValues(beanName, mbd, bw, pvs);
+											// 获取bean的属性名
+											String propertyName = pv.getName();
+											// 获取bean的属性值
+											Object originalValue = pv.getValue();
+											// 判断属性值是什么类型的，对象类型、List、Map、String
+											valueResolver.resolveValueIfNecessary(pv, originalValue);
+												// 如果需要，将给定的值作为表达式求值  ${name}
+												evaluate(typedStringValue);
+											// 将属性值转换成属性对应的类型
+											convertedValue = convertForProperty(resolvedValue, propertyName, bw, converter);
+												// 获取到bean的所有属性
+												getCachedIntrospectionResults();
+											bw.setPropertyValues(new MutablePropertyValues(deepCopy));
+												setPropertyValue(pv);
+													nestedPa.setPropertyValue(tokens, pv);
+														// 真正的使用反射调用invoke方法给属性赋值，如果属性是private的，则使用setAccessible(true)方法暴力访问
+														ph.setValue(this.wrappedObject, valueToApply);
 									// 调用bean的初始化方法
 									exposedObject = initializeBean(beanName, exposedObject, mbd);
 										// 检查bean是否实现Aware系列接口，给实现接口方法赋值
 										invokeAwareMethods(beanName, bean);
-										// 调用BeanPostProcessor.postProcessBeforeInitialization(Object bean, String beanName)的前置方法，返回一个bean对象
+										// 循环遍历所有工厂后置处理器，调用工厂后置处理器BeanPostProcessor.postProcessBeforeInitialization(Object bean, String beanName)的前置方法，返回一个bean对象
 										wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
 										// (调用bean的初始化方法)如果bean实现了InitializingBean接口，则调用InitializingBean.afterPropertiesSet()的初始化方法
 										invokeInitMethods(beanName, wrappedBean, mbd);
-										// 调用BeanPostProcessor.postProcessAfterInitialization(Object bean, String beanName)的后置方法，返回一个bean对象
-										wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
-											// Spring AOP代理对象创建
-											// 遍历所有后置处理器，其中AspectJAwareAdvisorAutoProxyCreator就是用于创建AOP代理对象(Spring AOP原理)
-											for (BeanPostProcessor processor : getBeanPostProcessors()) {
-											// 调用后置处理的的postProcessAfterInitialization方法，返回代理对象
-											Object current = processor.postProcessAfterInitialization(result, beanName);
-												// 由AspectJAwareAdvisorAutoProxyCreator父类AbstractAutoProxyCreator的方法实现
-												return wrapIfNecessary(bean, beanName, cacheKey);
-													// 封装着目标对象、切面类、切入点表达式
-													Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean.getClass(), beanName, null);
-													// 为给定的bean创建AOP代理
-													Object proxy = createProxy(bean.getClass(), beanName, specificInterceptors, new SingletonTargetSource(bean));
-														evaluateProxyInterfaces(beanClass, proxyFactory);
-															// 获取目标对象实现的接口
-															Class<?>[] targetInterfaces = ClassUtils.getAllInterfacesForClass(beanClass, getProxyClassLoader());
-															if (hasReasonableProxyInterface) {
-																// 如果目标对象有实现接口，则把目标对象的接口设置到ProxyFactory的interfaces属性上
-																proxyFactory.addInterface(ifc);
-																// 如果目标对象没有实现接口，则把ProxyFactory的proxyTargetClass属性设置为true
-																proxyFactory.setProxyTargetClass(true);
-														proxyFactory.getProxy(getProxyClassLoader());
-															createAopProxy().getProxy(classLoader);
-																return getAopProxyFactory().createAopProxy(this);
-																	// 如果ProxyFactory的interfaces属性有值，则使用Jdk创建代理对象
-																	if (targetClass.isInterface() || Proxy.isProxyClass(targetClass)) {
-																		return new JdkDynamicAopProxy(config);
-																		// 如果ProxyFactory的interfaces属性没有值，则使用Cglib创建代理对象
-																		return new ObjenesisCglibAopProxy(config);
-																		
-																		
+										// 循环遍历所有工厂后置处理器，调用工厂后置处理器BeanPostProcessor.postProcessAfterInitialization(Object bean, String beanName)的后置方法，返回一个bean对象
+										wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);							
 									// 从DefaultListableBeanFactory.singletonObjects中获取bean
 									Object earlySingletonReference = getSingleton(beanName, false);
 									// DestructionAwareBeanPostProcessors
@@ -304,6 +320,7 @@ try {
 							afterSingletonCreation(beanName);
 							// 将创建的bean注册到DefaultListableBeanFactory.singletonObjects中，已注册过的单实例bean名称DefaultListableBeanFactory.registeredSingletons
 							addSingleton(beanName, singletonObject);
+							
 			// 执行未实现任何接口的BeanDefinitionRegistryPostProcessor.postProcessBeanDefinitionRegistry(beanFactory);的前置方法
 			invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors, registry);
 			// 执行未实现任何接口的BeanDefinitionRegistryPostProcessor.postProcessBeanFactory(beanFactory);的后置方法
@@ -356,6 +373,7 @@ try {
 		
 	// 国际化相关
 	initMessageSource();
+		beanFactory.registerSingleton(MESSAGE_SOURCE_BEAN_NAME, this.messageSource);
 
 	// Initialize event multicaster for this context.
 	initApplicationEventMulticaster();
