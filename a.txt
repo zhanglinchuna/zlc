@@ -32,6 +32,7 @@ https://segmentfault.com/a/1190000016597648?utm_source=tag-newest#articleHeader1
 https://segmentfault.com/a/1190000019560001  --深入理解SpringApplication
 https://segmentfault.com/a/1190000019786425 --spring事件监听器
 
+https://fanlychie.github.io/post/thymeleaf.html --thymeleaf模板引擎文档
 
 
 
