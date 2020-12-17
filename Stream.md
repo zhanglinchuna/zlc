@@ -513,7 +513,15 @@ public class StreamTest {
 元素个数为：8
 ```
 
-#### 5.7 anyMatch
+#### 5.7 match
+
+匹配操作，包含：allMatch、anyMatch、noneMatch
+
+- allMatch：所有元素都满足条件，返回boolean类型
+- anyMatch：任意一个元素满足条件，返回boolean类型
+- noneMatch：所有元素都不满足条件，返回boolean类型
+
+###### anyMatch
 
 该方法需要一个Predicate参数，用于校验流中的元素，只要有一个满足规则，则返回true，全不满足，返回false。
 
@@ -531,7 +539,7 @@ false
 true
 ```
 
-#### 5.8 allMatch
+###### allMatch
 
 该方法同样需要一个Predicate参数，用于校验流中的所有元素，只有全部满足规则才能返回true，只要有一个不满足则返回false。
 
@@ -549,7 +557,7 @@ true
 false
 ```
 
-#### 5.9 noneMatch
+###### noneMatch
 
 该方法同样需要一个Predicate参数，用于校验流中的所有元素,只有所有元素都不满足规则的情况下返回true，否则返回false。
 
@@ -566,7 +574,14 @@ public class StreamTest {
 true
 false
 ```
-#### 5.10 findFirst
+#### 5.8 find
+
+查找操作，包含：findFirst、findAny
+
+- findFirst：找到第一个，返回的类型为Optional
+- findAny：使用 stream() 时找到的是第一个元素，使用 parallelStream() 并行时找到的是其中一个元素，返回的类型为Optional
+
+###### findFirst
 
 该方法无参数，主要用于获取流中的第一个元素，如果流无序，那么可能返回任意一个。
 
@@ -582,7 +597,7 @@ public class StreamTest {
 123
 ```
 
-#### 5.11 findAny
+###### findAny
 
 该方法无参数，主要用于获取流中的任一元素。
 
