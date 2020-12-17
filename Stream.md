@@ -419,13 +419,40 @@ public class CollectorsTest {
         // toCollection 将结果转成LinkedList
         List<String> list01 = list.stream().collect(Collectors.toCollection(LinkedList::new));
         // toCollection 将结果转成TreeSet
-        List<String> list01 = list.stream().collect(Collectors.toCollection(TreeSet::new));
+        List<String> list02 = list.stream().collect(Collectors.toCollection(TreeSet::new));
         // toList 将结果转成ArrayList
-        List<String> list02 = list.stream().collect(Collectors.toList());
+        List<String> list03 = list.stream().collect(Collectors.toList());
         // toSet 将结果转成HashSet
         Set<String> set01 = list.stream().collect(Collectors.toSet());
         // toMap 将结果转成HashMap
         Map<String, String> collect = list.stream().collect(Collectors.toMap(k -> k,k -> "value:" + k));
+        // joining 拼接字符串
+        String collect1 = list.stream().collect(Collectors.joining(","));
+        // couting 统计元素数量
+        Long collect2 = list.stream().collect(Collectors.counting());
+        // maxBy 获取最大元素
+        String collect3 = list.stream().collect(Collectors.maxBy((a, b) -> a.compareTo(b))).orElse(null);
+        
+        //  summarizingInt 汇总int类型的元素，返回IntSummaryStatistics，再调用具体的方法对元素进行统计：getCount（统计数量），getSum（求和），getMin（获取最小值），getMax（获取最大值），getAverage（获取平均值）
+        List<String> list04 = Arrays.asList("2", "3", "5");
+        IntSummaryStatistics summaryStatistics = list04.stream().collect(Collectors.summarizingInt(x -> Integer.parseInt(x)));
+        // getSum（求和）结果：sum = 10
+        long sum = summaryStatistics.getSum();
+
+        // averagingInt 获取int类型的元素的平均值，返回一个double类型的数据
+        Double double = list04.stream().collect(Collectors.averagingInt(x -> Integer.parseInt(x))); // 结果：double = 3.3333333333333335
+        
+        // mapping 获取映射，可以将原始元素的一部分内容作为一个新元素返回
+        List<User> userList = new ArrayList<User>() {{add(new User("jack",23)); add(new User("james",30)); add(new User("curry",28));}};
+        //[jack, james, curry]
+        List<String> collect4 = userList.stream().collect(Collectors.mapping(User::getName, Collectors.toList()));
+    }
+    
+    @Data
+    @AllArgsConstructor
+    static class User {
+        private String name;
+        private Integer age;
     }
 }
 ```
