@@ -394,6 +394,23 @@ public interface Stream<T> extends BaseStream<T, Stream<T>> {
 
 JDK提供了一个Collectors工具类，在这个工具类里面预实现了多个的Collector供我们直接使用
 
+- toMap：将数据流转换为map，里面包含的元素是用key/value的形式的
+- toSet：将数据流转换为set，里面包含的元素不可重复
+- toList：将数据流转出为list，里面包含的元素是有序的
+- joining：拼接字符串
+- groupingBy：分组，可以将list转换map
+- couting：统计元素数量
+- maxBy：获取最大元素
+- minBy：获取最小元素
+- summarizingInt: 汇总int类型的元素，返回IntSummaryStatistics，再调用具体的方法对元素进行统计：getCount（统计数量），getSum（求和），getMin（获取最小值），getMax（获取最大值），getAverage（获取平均值）
+- summarizingLong：汇总long类型的元素，用法同summarizingInt
+- summarizingDouble：汇总double类型的元素，用法同summarizingInt
+- averagingInt：获取int类型的元素的平均值，返回一个double类型的数据
+- averagingLong：获取long类型的元素的平均值，用法同averagingInt
+- averagingDouble：获取double类型的元素的平均值，用法同averagingInt
+- mapping：获取映射，可以将原始元素的一部分内容作为一个新元素返回
+
+
 ```java
 public class CollectorsTest {
    
