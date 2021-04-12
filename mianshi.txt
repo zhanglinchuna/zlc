@@ -1,6 +1,6 @@
 配置 ShiroFilterFactoryBean 拦截器，注册的bean名称：shiroFilter
 
-shiro执行流程：
+shiro登入执行流程：
 1、OAuth2Filter.onAccessDenied
 	1.1 从请求头HttpServletRequest.getHeader("token") 或 请求参数HttpServletRequest.getParameter("token") 中获取token
 		未获取到token -> json{401: invalid token}，返回给前端401错误json错误
@@ -37,3 +37,34 @@ export function clearLoginInfo () {
   router.options.isAddDynamicMenuRoutes = false
 }
 ```
+shiro授权执行流程：
+api接口权限控制
+/**
+* 授权(验证权限时调用)
+*/
+@Override
+protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
+   SysUserEntity user = (SysUserEntity)principals.getPrimaryPrincipal();
+   Long userId = user.getUserId();
+
+  //用户权限列表
+  Set<String> permsSet = shiroService.getUserPermissions(userId);
+  //将用户权限列表设置到Authorization.stringPermissions属性中
+  SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
+  info.setStringPermissions(permsSet);
+  return info;
+}
+在需要权限控制的Controller层代码添加@RequiresPermissions("sys:menu:select")注解
+
+前端页面权限控制
+进入系统首页路由配置加载 router.index.js ；调用后台接口/sys/menu/nav查询用户的授权标识列表，将查询到的权限列表permissions存储到本地sessionStorage中
+前端页面使用v-if指令判断是否有对应的权限
+v-if="isAuth('sys:user:save')"
+
+/**
+ * 是否有权限
+ * @param {*} key
+ */
+export function isAuth (key) {
+  return JSON.parse(sessionStorage.getItem('permissions') || '[]').indexOf(key) !== -1 || false
+}
