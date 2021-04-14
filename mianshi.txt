@@ -70,8 +70,6 @@ export function isAuth (key) {
   return JSON.parse(sessionStorage.getItem('permissions') || '[]').indexOf(key) !== -1 || false
 }
 
-
-
 -----------------------------------------------------------------------------------多数据源----------------------------------------------------------------------------------
 AbstractRoutingDataSource extends AbstractDataSource; AbstractDataSource implements DataSource
 AbstractRoutingDataSource重写了jdbc的DataSource.getConnection方法
