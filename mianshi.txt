@@ -74,4 +74,18 @@ export function isAuth (key) {
 
 -----------------------------------------------------------------------------------多数据源----------------------------------------------------------------------------------
 
+-----------------------------------------------------------------------------------springMVC----------------------------------------------------------------------------------
+1、首先所有请求都会经过 DispatcherServlet前端控制器
+2、DispatcherServlet.doDispatch去调用mappedHandler = getHandler(processedRequest)，getHandler遍历所有handlerMappings，返回一个能处理当前请求的handlerMapping和HandlerInterceptor(HandlerExecutionChain:handler映射器,Interceptor拦截器)
+3、根据handlerMapping返回一个能处理当前请求的handlerAdapter(handler适配器)
+4、执行拦截器链Interceptor的前置方法preHandle(返回true放行当前请求，返回false拦截当前请求)
+5、handlerAdapter去执行目标方法(也就是标注有@Controller类@RequestMapping方法)
+6、返回目标方法页面ModelAndView，并执行拦截器链Interceptor的postHandle后置方法
+7、渲染页面，再次调用拦截器afterCompletion方法，将渲染好的页面返回给用户
+
+HandlerMapping
+RequestMappingHandlerMapping：处理标注有@Controller的这类注解的处理器
+HttpRequestHandlerAdapter：处理实现了HttpRequestHandler接口的处理器
+SimpleControllerHandlerAdapter：处理实现了Controller接口的处理器
+
 
